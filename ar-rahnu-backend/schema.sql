@@ -27,3 +27,10 @@ CREATE TABLE IF NOT EXISTS arrahnu_audit_logs (
   meta JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS arrahnu_app_users (
+  email TEXT PRIMARY KEY,
+  password_hash TEXT NOT NULL,
+  full_name TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

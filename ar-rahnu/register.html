@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register User Ar-Rahnu</title>
+  <style>
+    body{font-family:Arial;margin:0;background:#0f1722;color:#eef3fb;display:grid;place-items:center;min-height:100vh;padding:16px}
+    .box{width:min(420px,100%);background:#152131;border:1px solid #30405b;border-radius:14px;padding:16px}
+    input{width:100%;padding:11px;border-radius:10px;border:1px solid #3a4d6c;background:#0f1724;color:#fff;margin:6px 0}
+    button{width:100%;padding:11px;border:none;border-radius:10px;background:#9ce84d;font-weight:700;color:#12210a}
+    a{color:#9ce84d}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Register User Baru</h2>
+    <input id="fullName" placeholder="Nama penuh" />
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password (min 6)" />
+    <button onclick="reg()">Daftar</button>
+    <p id="msg"></p>
+    <p><a href="./login.html">← Kembali ke login</a></p>
+  </div>
+
+  <script>
+    const API_KEY='arrahnu_sync_cfg_v1';
+    async function reg(){
+      const cfg=JSON.parse(localStorage.getItem(API_KEY)||'{}');
+      if(!cfg.apiBase) return m('API Base URL belum diset dalam app utama.');
+      const fullName=document.getElementById('fullName').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const password=document.getElementById('password').value;
+      const res=await fetch(cfg.apiBase.replace(/\/$/,'')+'/auth/register-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullName,email,password})});
+      const data=await res.json();
+      if(!res.ok) return m(data.error||'Daftar gagal');
+      m('Daftar berjaya ✅ Sila login.');
+      setTimeout(()=>location.href='./login.html',900);
+    }
+    function m(t){document.getElementById('msg').textContent=t;}
+  </script>
+</body>
+</html>

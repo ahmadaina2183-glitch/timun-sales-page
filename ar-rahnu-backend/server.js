@@ -25,6 +25,7 @@ async function initDb() {
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_subscriptions (endpoint TEXT PRIMARY KEY, subscription JSONB NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_staff_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'staff', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_audit_logs (id BIGSERIAL PRIMARY KEY, actor_email TEXT, action TEXT NOT NULL, target TEXT, meta JSONB, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_app_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, full_name TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
 
   // Seed 1 admin from env if missing
   if (process.env.STAFF_EMAIL && process.env.STAFF_PASSWORD) {
@@ -52,6 +53,34 @@ function auth(req, res, next) {
   catch { return res.status(401).json({ ok: false, error: 'Invalid token' }); }
 }
 function adminOnly(req,res,next){ if(req.user?.role!=='admin') return res.status(403).json({ok:false,error:'Admin only'}); next(); }
+
+app.post('/auth/register-user', async (req, res) => {
+  const { email = '', password = '', fullName = '' } = req.body || {};
+  if (!email || !password) return res.status(400).json({ ok: false, error: 'email/password required' });
+  if (password.length < 6) return res.status(400).json({ ok: false, error: 'password min 6 chars' });
+
+  const exists = await pool.query('SELECT email FROM arrahnu_app_users WHERE email=$1', [email]);
+  if (exists.rows.length) return res.status(409).json({ ok: false, error: 'Email dah wujud' });
+
+  const hash = await bcrypt.hash(password, 10);
+  await pool.query('INSERT INTO arrahnu_app_users (email, password_hash, full_name) VALUES ($1,$2,$3)', [email, hash, fullName || null]);
+  await logAudit(email, 'user.register', email);
+  res.json({ ok: true });
+});
+
+app.post('/auth/login-user', async (req, res) => {
+  const { email = '', password = '' } = req.body || {};
+  const q = await pool.query('SELECT email, password_hash, full_name FROM arrahnu_app_users WHERE email=$1', [email]);
+  if (!q.rows.length) return res.status(401).json({ ok: false, error: 'Login gagal' });
+
+  const u = q.rows[0];
+  const valid = await bcrypt.compare(password, u.password_hash);
+  if (!valid) return res.status(401).json({ ok: false, error: 'Login gagal' });
+
+  const token = jwt.sign({ role: 'user', email: u.email, fullName: u.full_name || '' }, JWT_SECRET, { expiresIn: '7d' });
+  await logAudit(u.email, 'user.login', u.email);
+  res.json({ ok: true, token, user: { email: u.email, role: 'user', fullName: u.full_name || '' } });
+});
 
 app.post('/auth/login', async (req, res) => {
   const { email = '', password = '' } = req.body || {};
