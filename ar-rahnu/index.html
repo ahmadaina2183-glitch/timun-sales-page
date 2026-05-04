@@ -13,7 +13,7 @@
     .wrap{max-width:1200px;margin:auto;padding:18px}.title{font-family:"Oswald",sans-serif;font-size:42px;letter-spacing:.5px;margin:0}
     .muted{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
     label{font-size:13px;color:#c4d0e2} input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #36425a;background:#111927;color:#eef4ff}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
     .btn{background:var(--acc);border:none;color:#16220a;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}.btn.alt{background:#2b364b;color:#dbe6f5}
     table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid #2c374b;padding:9px;text-align:left;font-size:13px} th{color:#b9cae4}
     .badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.due{background:#3a2a2a;color:#ffc5c5}.soon{background:#3a3822;color:#ffe9a6}.ok{background:#1f3528;color:#bdf7ce}
@@ -39,7 +39,8 @@
         </div>
         <div class="row3">
           <div><label>Nilai Pinjaman (RM)</label><input id="principal" type="number" step="0.01" /></div>
-          <div><label>Kadar Upah Simpan (% setahun)</label><input id="rate" type="number" step="0.01" value="12" /></div>
+          <div><label>Kadar Upah (%)</label><input id="rate" type="number" step="0.01" value="12" /></div>
+          <div><label>Mode Upah</label><select id="rateMode"><option value="year">Setahun</option><option value="month">Sebulan</option></select></div>
           <div><label>Tarikh Mula</label><input id="startDate" type="date" /></div>
         </div>
         <div class="row3">
@@ -99,16 +100,19 @@
     let records = JSON.parse(localStorage.getItem(KEY)||'[]');
 
     const rm=v=>`RM ${Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-    const monthlyFee=r=>((Number(r.remainingPrincipal||r.principal)||0)*(Number(r.rate)||0)/100/12);
+    const monthlyFee=r=>{
+      const base=(Number(r.remainingPrincipal||r.principal)||0)*(Number(r.rate)||0)/100;
+      return r.rateMode==='month' ? base : base/12;
+    };
     const monthsElapsed=d=>{const s=new Date(d);const n=new Date();return Math.max(0,(n.getFullYear()-s.getFullYear())*12+(n.getMonth()-s.getMonth())+(n.getDate()>=s.getDate()?0:-1));}
     const addMonths=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x;}
     function nextDueDate(r){const s=new Date(r.startDate);const m=monthsElapsed(r.startDate)+1;return addMonths(s,m);}
     function fullRedeemToday(r){return (Number(r.remainingPrincipal||r.principal)||0)+monthlyFee(r)*monthsElapsed(r.startDate)}
 
     function save(){localStorage.setItem(KEY,JSON.stringify(records));render();}
-    function clearForm(){['customer','ic','refNo','principal','rate','startDate','tenure','item','remainingPrincipal','notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('rate').value=12;document.getElementById('tenure').value=6;}
+    function clearForm(){['customer','ic','refNo','principal','rate','startDate','tenure','item','remainingPrincipal','notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('rate').value=12;document.getElementById('rateMode').value='year';document.getElementById('tenure').value=6;}
     function saveRecord(){
-      const r={id:crypto.randomUUID(),customer:v('customer'),ic:v('ic'),refNo:v('refNo')||`SRT-${Date.now()}`,principal:+v('principal')||0,rate:+v('rate')||0,startDate:v('startDate'),tenure:+v('tenure')||6,item:v('item'),remainingPrincipal:+v('remainingPrincipal')||0,notes:v('notes')};
+      const r={id:crypto.randomUUID(),customer:v('customer'),ic:v('ic'),refNo:v('refNo')||`SRT-${Date.now()}`,principal:+v('principal')||0,rate:+v('rate')||0,rateMode:v('rateMode')||'year',startDate:v('startDate'),tenure:+v('tenure')||6,item:v('item'),remainingPrincipal:+v('remainingPrincipal')||0,notes:v('notes')};
       if(!r.customer||!r.startDate||!r.principal)return alert('Isi nama, prinsipal, tarikh mula');
       if(!r.remainingPrincipal)r.remainingPrincipal=r.principal;
       records.unshift(r);save();clearForm();
@@ -161,7 +165,7 @@
       const partial=+v('partialRedeem')||0; const newLoan=+v('newLoan')||0;
       const redeemNow=fullRedeemToday(r);
       const newRemaining=Math.max(0,(r.remainingPrincipal||r.principal)-partial);
-      const newMonthly=(newRemaining*(r.rate/100)/12);
+      const newMonthly=(r.rateMode==='month') ? (newRemaining*(r.rate/100)) : (newRemaining*(r.rate/100)/12);
       const overlapProfit=newLoan-redeemNow;
       document.getElementById('calcOut').innerHTML=`
         Tebus penuh hari ini: <b>${rm(redeemNow)}</b><br>
