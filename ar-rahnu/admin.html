@@ -51,13 +51,21 @@
 const cfg=JSON.parse(localStorage.getItem('arrahnu_sync_cfg_v1')||'{}');
 const token=localStorage.getItem('arrahnu_auth_token_v1')||'';
 const base=(cfg.apiBase||'').replace(/\/$/,'');
-if(!base||!token){alert('Login admin dulu + set API Base URL');location.href='./login-admin.html';}
+const demoMode = !base || !token;
 
 const h={'Content-Type':'application/json','Authorization':'Bearer '+token};
 const msg=t=>document.getElementById('msg').textContent=t;
 async function api(path,opt={}){return fetch(base+path,{...opt,headers:{...h,...(opt.headers||{})}})}
 
+let demoStaff = JSON.parse(localStorage.getItem('demo_staff')||'[{"email":"staff.demo@arrahnu.my","role":"staff"}]');
+let demoUsers = JSON.parse(localStorage.getItem('demo_users')||'[{"email":"user.demo@arrahnu.my","full_name":"Demo User"}]');
 async function load(){
+  if(demoMode){
+    msg('Demo mode: tanpa login/backend.');
+    document.getElementById('staffRows').innerHTML=(demoStaff||[]).map(x=>`<tr><td>${x.email}</td><td>${x.role}</td><td><button onclick="delStaff('${x.email}')">Padam</button></td></tr>`).join('');
+    document.getElementById('userRows').innerHTML=(demoUsers||[]).map(x=>`<tr><td>${x.email}</td><td>${x.full_name||'-'}</td><td><button onclick="delUser('${x.email}')">Padam</button></td></tr>`).join('');
+    return;
+  }
   const s=await api('/staff/list'); const sd=await s.json();
   if(!s.ok) return msg(sd.error||'No access');
   document.getElementById('staffRows').innerHTML=(sd.staff||[]).map(x=>`<tr><td>${x.email}</td><td>${x.role}</td><td><button onclick="delStaff('${x.email}')">Padam</button></td></tr>`).join('');
@@ -68,17 +76,29 @@ async function load(){
 
 async function saveStaff(){
   const email=sEmail.value.trim(),password=sPass.value,role=sRole.value;
+  if(demoMode){
+    demoStaff = demoStaff.filter(x=>x.email!==email).concat([{email,role}]);
+    localStorage.setItem('demo_staff', JSON.stringify(demoStaff));
+    msg('Staff disimpan (demo).');
+    return load();
+  }
   const r=await api('/staff/create',{method:'POST',body:JSON.stringify({email,password,role})});
   const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('Staff disimpan'); load();
 }
-async function delStaff(email){ if(!confirm('Padam staff '+email+'?')) return; const r=await api('/staff/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
+async function delStaff(email){ if(!confirm('Padam staff '+email+'?')) return; if(demoMode){demoStaff=demoStaff.filter(x=>x.email!==email);localStorage.setItem('demo_staff', JSON.stringify(demoStaff));return load();} const r=await api('/staff/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
 
 async function saveUser(){
   const email=uEmail.value.trim(),fullName=uName.value.trim(),password=uPass.value||'User@1234';
+  if(demoMode){
+    demoUsers = demoUsers.filter(x=>x.email!==email).concat([{email,full_name:fullName||'-'}]);
+    localStorage.setItem('demo_users', JSON.stringify(demoUsers));
+    msg('User disimpan (demo).');
+    return load();
+  }
   const r=await api('/users/create',{method:'POST',body:JSON.stringify({email,fullName,password})});
   const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('User disimpan'); load();
 }
-async function delUser(email){ if(!confirm('Padam user '+email+'?')) return; const r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
+async function delUser(email){ if(!confirm('Padam user '+email+'?')) return; if(demoMode){demoUsers=demoUsers.filter(x=>x.email!==email);localStorage.setItem('demo_users', JSON.stringify(demoUsers));return load();} const r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
 
 load();
 </script>
