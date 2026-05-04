@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS arrahnu_staff_users (
   email TEXT PRIMARY KEY,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'staff',
+  token_version INT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -32,5 +33,6 @@ CREATE TABLE IF NOT EXISTS arrahnu_app_users (
   email TEXT PRIMARY KEY,
   password_hash TEXT NOT NULL,
   full_name TEXT,
+  token_version INT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
