@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.js"></script>
   <style>
     :root{--bg:#0e1520;--panel:#161f2c;--line:#2f3a4f;--text:#eaf0f8;--muted:#9fb0c8;--acc:#9ce84d;--danger:#ff7b7b}
     *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0e1520,#090f16);color:var(--text);font-family:"IBM Plex Sans",sans-serif}
@@ -59,8 +60,9 @@
 
       <section class="panel">
         <h3>OCR Surat (Auto Baca)</h3>
-        <p class="muted">Upload gambar surat. Sistem cuba extract nilai, tarikh, nombor surat, nama.</p>
-        <input type="file" accept="image/*" onchange="runOCR(event)" />
+        <p class="muted">Upload gambar/PDF surat. Sistem extract nilai, tarikh, no surat, nama, kadar upah & mode.</p>
+        <input type="file" accept="image/*,.pdf,application/pdf" onchange="runOCR(event)" />
+        <div id="ocrStatus" class="muted" style="margin-top:8px"></div>
         <pre id="ocrText" style="white-space:pre-wrap;background:#101826;padding:10px;border-radius:10px;max-height:220px;overflow:auto;margin-top:8px"></pre>
       </section>
     </div>
@@ -98,6 +100,7 @@
   <script>
     const KEY='arrahnu_records_v1';
     let records = JSON.parse(localStorage.getItem(KEY)||'[]');
+    if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.js';
 
     const rm=v=>`RM ${Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
     const monthlyFee=r=>{
@@ -145,19 +148,80 @@
 
     async function runOCR(e){
       const f=e.target.files?.[0]; if(!f) return;
-      document.getElementById('ocrText').textContent='Sedang baca OCR...';
-      const { data:{ text } } = await Tesseract.recognize(f,'eng+msa');
-      document.getElementById('ocrText').textContent=text;
-      autoFill(text);
+      const status = document.getElementById('ocrStatus');
+      const textBox = document.getElementById('ocrText');
+      textBox.textContent=''; status.textContent='Proses OCR dimulakan...';
+      try{
+        let imgSource;
+        if(f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf')){
+          status.textContent='Render PDF halaman 1...';
+          const ab = await f.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+          const page = await pdf.getPage(1);
+          const viewport = page.getViewport({scale:2});
+          const c = document.createElement('canvas'); c.width = viewport.width; c.height = viewport.height;
+          const ctx = c.getContext('2d');
+          await page.render({canvasContext:ctx, viewport}).promise;
+          imgSource = c;
+        }else{
+          imgSource = await fileToImage(f);
+        }
+
+        status.textContent='Enhance imej untuk OCR...';
+        const cleanCanvas = preprocessImage(imgSource);
+
+        status.textContent='Baca teks (eng+msa)...';
+        const { data:{ text } } = await Tesseract.recognize(cleanCanvas,'eng+msa',{ logger:m=>{ if(m.status) status.textContent = `OCR: ${m.status} ${m.progress?Math.round(m.progress*100)+'%':''}`; } });
+        textBox.textContent=text;
+        status.textContent='OCR siap. Data cuba diisi automatik.';
+        autoFill(text);
+      }catch(err){
+        status.textContent='OCR gagal: '+err.message;
+      }
+    }
+
+    function fileToImage(file){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.onload=()=>resolve(img);
+        img.onerror=reject;
+        img.src=URL.createObjectURL(file);
+      });
+    }
+
+    function preprocessImage(src){
+      const c=document.createElement('canvas');
+      const w=src.width||src.naturalWidth, h=src.height||src.naturalHeight;
+      c.width=w; c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(src,0,0,w,h);
+      const img=ctx.getImageData(0,0,w,h); const d=img.data;
+      for(let i=0;i<d.length;i+=4){
+        const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        const v=g>150?255:0; d[i]=d[i+1]=d[i+2]=v;
+      }
+      ctx.putImageData(img,0,0);
+      return c;
     }
 
     function autoFill(t){
-      const num=(t.match(/(RM\s*)?([0-9]{2,6}(?:[\.,][0-9]{1,2})?)/i)||[])[2];
-      const ref=(t.match(/(No\.?\s*(Surat|Akaun)?\s*[:\-]?\s*([A-Z0-9\-\/]{4,}))/i)||[])[3];
-      const date=(t.match(/(\d{2}[\/\-]\d{2}[\/\-]\d{4})/)||[])[1];
-      if(num) document.getElementById('principal').value=Number(num.replace(',','.'));
-      if(ref) document.getElementById('refNo').value=ref;
+      const txt=t.replace(/\r/g,'');
+      const principal=(txt.match(/(?:jumlah\s*pinjaman|pinjaman|nilai\s*marhun|jumlah)\s*[:\-]?\s*RM?\s*([0-9,\.]+)/i)||txt.match(/RM\s*([0-9,\.]{3,})/i)||[])[1];
+      const ref=(txt.match(/(?:no\.?\s*(?:surat|akaun|resit|rujukan)?|rujukan)\s*[:\-]?\s*([A-Z0-9\-\/]{4,})/i)||[])[1];
+      const date=(txt.match(/(?:tarikh\s*(?:mula|gadai)?\s*[:\-]?\s*)?(\d{2}[\/\-]\d{2}[\/\-]\d{4})/i)||[])[1];
+      const rate=(txt.match(/(?:kadar\s*upah|upah\s*simpan|profit\s*rate)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%/i)||[])[1];
+      const name=(txt.match(/(?:nama\s*(?:penggadai|pelanggan)?|customer\s*name)\s*[:\-]?\s*([A-Z@\-\s]{4,})/im)||[])[1];
+      const ic=(txt.match(/(?:no\.?\s*(?:kp|ic)|ic)\s*[:\-]?\s*([0-9\-]{10,14})/i)||[])[1];
+
+      if(principal) document.getElementById('principal').value=Number(principal.replace(/,/g,''));
+      if(ref) document.getElementById('refNo').value=ref.trim();
+      if(rate) document.getElementById('rate').value=Number(rate);
+      if(name) document.getElementById('customer').value=name.trim();
+      if(ic) document.getElementById('ic').value=ic.trim();
       if(date){const p=date.split(/[\/-]/);document.getElementById('startDate').value=`${p[2]}-${p[1]}-${p[0]}`}
+
+      if(/sebulan|bulan/i.test(txt)) document.getElementById('rateMode').value='month';
+      if(/setahun|tahunan|per\s*annum|p\.a\./i.test(txt)) document.getElementById('rateMode').value='year';
     }
 
     function calculateAdvanced(){
