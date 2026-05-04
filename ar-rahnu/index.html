@@ -57,6 +57,7 @@
           <button class="btn" onclick="saveRecord()">Simpan Surat</button>
           <button class="btn alt" onclick="clearForm()">Reset</button>
           <button class="btn alt" onclick="downloadData()">Export JSON</button>
+          <button class="btn alt" onclick="exportCSV()">Export CSV</button>
           <label class="btn alt" style="cursor:pointer">Import JSON<input type="file" accept="application/json" style="display:none" onchange="importData(event)" /></label>
         </div>
       </section>
@@ -97,6 +98,15 @@
     <section class="panel" style="margin-top:12px">
       <h3>Reminder Bulanan (30 hari akan datang)</h3>
       <div id="reminderList" class="muted"></div>
+    </section>
+
+    <section class="panel" style="margin-top:12px">
+      <h3>Phase 2 — Laporan Ringkas</h3>
+      <div class="row">
+        <div><label>Bulan Laporan</label><input id="reportMonth" type="month" /></div>
+        <div style="display:flex;align-items:end"><button class="btn alt" onclick="buildMonthlyReport()">Jana Laporan</button></div>
+      </div>
+      <div id="reportOut" class="muted" style="margin-top:8px"></div>
     </section>
 
     <section class="panel" style="margin-top:12px">
@@ -395,9 +405,35 @@
       r.onload=()=>{try{records=JSON.parse(r.result);save();}catch{alert('Format JSON tak sah')}}; r.readAsText(f);
     }
 
+    function exportCSV(){
+      const headers=['refNo','customer','ic','principal','remainingPrincipal','rate','rateMode','startDate','tenure','item','notes'];
+      const lines=[headers.join(',')].concat(records.map(r=>headers.map(h=>`"${String(r[h]??'').replaceAll('"','""')}"`).join(',')));
+      const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='arrahnu-records.csv';a.click();
+    }
+
+    function buildMonthlyReport(){
+      const ym = document.getElementById('reportMonth').value;
+      if(!ym) return document.getElementById('reportOut').innerHTML='Pilih bulan dulu.';
+      const [y,m]=ym.split('-').map(Number);
+      const inMonth = records.filter(r=>{const d=new Date(r.startDate); return d.getFullYear()===y && (d.getMonth()+1)===m;});
+      const totalPrincipal=inMonth.reduce((a,b)=>a+Number(b.remainingPrincipal||b.principal||0),0);
+      const totalMonthly=inMonth.reduce((a,b)=>a+monthlyFee(b),0);
+      const totalRedeem=inMonth.reduce((a,b)=>a+fullRedeemToday(b),0);
+      const avgRate=inMonth.length ? (inMonth.reduce((a,b)=>a+Number(b.rate||0),0)/inMonth.length) : 0;
+      document.getElementById('reportOut').innerHTML =
+        `Bil surat bulan dipilih: <b>${inMonth.length}</b><br>`+
+        `Total prinsipal aktif: <b>${rm(totalPrincipal)}</b><br>`+
+        `Anggaran upah bulanan: <b>${rm(totalMonthly)}</b><br>`+
+        `Anggaran tebus penuh semasa: <b>${rm(totalRedeem)}</b><br>`+
+        `Purata kadar upah: <b>${avgRate.toFixed(2)}%</b>`;
+    }
+
     render();
     document.getElementById('apiBase').value = syncCfg.apiBase||'';
     document.getElementById('vapidKey').value = syncCfg.vapidKey||'';
+    const now = new Date();
+    document.getElementById('reportMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     setSyncStatus(authToken ? 'Auto-login staff aktif.' : 'Belum login staff.');
     setInterval(notifyCheck,60000);
     setInterval(()=>{ if(navigator.onLine && pendingOps.length) syncNow(); },120000);
