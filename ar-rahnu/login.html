@@ -45,6 +45,11 @@
     const API_KEY='arrahnu_sync_cfg_v1';
     const AUTH_KEY='arrahnu_auth_token_v1';
     const PROFILE_KEY='arrahnu_profile_v1';
+    const DEMO = {
+      user: { email: 'user.demo@arrahnu.my', password: 'User@9281' },
+      staff: { email: 'staff.demo@arrahnu.my', password: 'Staff@4721' },
+      admin: { email: 'admin.demo@arrahnu.my', password: 'Admin@6639' }
+    };
 
     function setRole(r){
       role=r;
@@ -65,7 +70,14 @@
       if(!email || !password) return setMsg('Isi email dan password');
 
       const cfg=JSON.parse(localStorage.getItem(API_KEY)||'{}');
-      if(!cfg.apiBase) return setMsg('API Base URL belum diset dalam app utama.');
+      const demo = DEMO[role];
+      if(email===demo.email && password===demo.password){
+        localStorage.setItem(AUTH_KEY,'demo-token');
+        localStorage.setItem(PROFILE_KEY, JSON.stringify({role,email}));
+        return window.location.href='./index.html';
+      }
+
+      if(!cfg.apiBase) return setMsg('Demo login: guna kredensial demo yang saya bagi.');
 
       try{
         const endpoint = role==='user' ? '/auth/login-user' : '/auth/login';
