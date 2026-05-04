@@ -1,47 +1,72 @@
 <!DOCTYPE html>
-<html lang="ms"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>User Access</title>
-<style>body{font-family:Arial;background:#0f1722;color:#eef3fb;display:grid;place-items:center;min-height:100vh;margin:0;padding:14px}.box{width:min(430px,100%);background:#152131;border:1px solid #30405b;border-radius:14px;padding:16px}.tabs{display:flex;gap:8px;margin-bottom:10px}.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid #44597a;background:#1a2739;color:#dce8fa}.tabs button.active{background:#9ce84d;color:#13210b;border:none}input{width:100%;padding:11px;border-radius:10px;border:1px solid #3a4d6c;background:#0f1724;color:#fff;margin:6px 0}button.primary{width:100%;padding:11px;border:none;border-radius:10px;background:#9ce84d;font-weight:700;color:#12210a}a{color:#9ce84d}.hide{display:none}</style></head>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>User Portal | Ar-Rahnu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#070f18;--gold:#e9cf90;--mint:#9ce84d;--line:rgba(233,207,144,.28);--txt:#eef4fb;--muted:#a9bfd4}
+    *{box-sizing:border-box}body{margin:0;font-family:Manrope,sans-serif;background:radial-gradient(circle at 20% 10%,#173754,#070f18 55%);color:var(--txt);min-height:100vh;display:grid;place-items:center;padding:16px}
+    .shell{width:min(520px,100%);background:linear-gradient(160deg,#14283b,#0f1f2f);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+    h2{margin:0 0 8px;font-family:Oswald,sans-serif;letter-spacing:.7px;font-size:36px;color:var(--gold)}
+    .sub{color:var(--muted);margin:0 0 14px}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+    .tabs button{padding:11px;border-radius:12px;border:1px solid #3b536f;background:#15293d;color:#dbe8f7;font-weight:700;cursor:pointer}
+    .tabs button.active{background:var(--mint);color:#172509;border:none}
+    .pane{display:none}.pane.active{display:block}
+    input{width:100%;padding:12px;border-radius:12px;border:1px solid #3d5674;background:#102033;color:#fff;margin:6px 0}
+    .btn{width:100%;padding:12px;border:none;border-radius:12px;background:var(--mint);font-weight:800;color:#152308;cursor:pointer;margin-top:6px}
+    .links{margin-top:12px;font-size:14px}.links a{color:var(--gold);text-decoration:none}
+    #msg{margin-top:10px;color:#d2e4f5;font-size:14px}
+  </style>
+</head>
 <body>
-<div class="box">
-  <h2>User Portal</h2>
-  <div class="tabs">
-    <button id="tLogin" class="active" onclick="show('login')">Login</button>
-    <button id="tReg" onclick="show('reg')">Register</button>
-    <button id="tForgot" onclick="show('forgot')">Forgot</button>
+  <div class="shell">
+    <h2>USER PORTAL</h2>
+    <p class="sub">Login, daftar akaun baru, atau reset password.</p>
+
+    <div class="tabs">
+      <button id="tLogin" class="active" onclick="show('login')">Login</button>
+      <button id="tReg" onclick="show('reg')">Register</button>
+      <button id="tForgot" onclick="show('forgot')">Forgot</button>
+    </div>
+
+    <div id="loginPane" class="pane active">
+      <input id="lEmail" type="email" placeholder="Email" />
+      <input id="lPass" type="password" placeholder="Password" />
+      <button class="btn" onclick="loginUser()">Login</button>
+    </div>
+
+    <div id="regPane" class="pane">
+      <input id="rName" placeholder="Nama penuh" />
+      <input id="rEmail" type="email" placeholder="Email" />
+      <input id="rPass" type="password" placeholder="Password min 6" />
+      <button class="btn" onclick="registerUser()">Daftar Akaun</button>
+    </div>
+
+    <div id="forgotPane" class="pane">
+      <input id="fEmail" type="email" placeholder="Email" />
+      <button class="btn" onclick="requestCode()">Minta Kod Reset</button>
+      <input id="fCode" placeholder="Kod reset 6 digit" />
+      <input id="fNew" type="password" placeholder="Password baru" />
+      <button class="btn" onclick="confirmReset()">Confirm Reset</button>
+    </div>
+
+    <div id="msg"></div>
+    <div class="links"><a href="./login-staff.html">Staff login</a> • <a href="./login-admin.html">Admin login</a></div>
   </div>
 
-  <div id="loginPane">
-    <input id="lEmail" type="email" placeholder="Email">
-    <input id="lPass" type="password" placeholder="Password">
-    <button class="primary" onclick="loginUser()">Login</button>
-  </div>
-
-  <div id="regPane" class="hide">
-    <input id="rName" placeholder="Nama penuh">
-    <input id="rEmail" type="email" placeholder="Email">
-    <input id="rPass" type="password" placeholder="Password min 6">
-    <button class="primary" onclick="registerUser()">Register</button>
-  </div>
-
-  <div id="forgotPane" class="hide">
-    <input id="fEmail" type="email" placeholder="Email">
-    <button class="primary" onclick="requestCode()">Minta Kod Reset</button>
-    <input id="fCode" placeholder="Kod reset 6 digit">
-    <input id="fNew" type="password" placeholder="Password baru">
-    <button class="primary" onclick="confirmReset()">Confirm Reset</button>
-  </div>
-
-  <p id="msg"></p>
-  <p><a href="./login-staff.html">Staff login</a> • <a href="./login-admin.html">Admin login</a></p>
-</div>
 <script>
 const API_KEY='arrahnu_sync_cfg_v1', AUTH_KEY='arrahnu_auth_token_v1', PROFILE_KEY='arrahnu_profile_v1';
 function api(){const c=JSON.parse(localStorage.getItem(API_KEY)||'{}'); return (c.apiBase||'').replace(/\/$/,'');}
 function m(t){document.getElementById('msg').textContent=t}
-function show(x){['login','reg','forgot'].forEach(v=>{document.getElementById(v+'Pane').classList.toggle('hide',v!==x);document.getElementById('t'+(v==='reg'?'Reg':v==='forgot'?'Forgot':'Login')).classList.toggle('active',v===x)})}
+function show(x){['login','reg','forgot'].forEach(v=>{document.getElementById(v+'Pane').classList.toggle('active',v===x);document.getElementById('t'+(v==='reg'?'Reg':v==='forgot'?'Forgot':'Login')).classList.toggle('active',v===x)})}
 async function loginUser(){if(!api())return m('Set API Base URL dulu dalam app utama.');const email=lEmail.value.trim(),password=lPass.value;const r=await fetch(api()+'/auth/login-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const d=await r.json();if(!r.ok)return m(d.error||'Login gagal');localStorage.setItem(AUTH_KEY,d.token||'');localStorage.setItem(PROFILE_KEY,JSON.stringify({role:'user',email:d.user.email}));location.href='./index.html';}
-async function registerUser(){if(!api())return m('Set API Base URL dulu dalam app utama.');const fullName=rName.value.trim(),email=rEmail.value.trim(),password=rPass.value;const r=await fetch(api()+'/auth/register-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullName,email,password})});const d=await r.json();if(!r.ok)return m(d.error||'Register gagal');m('Register berjaya. Sila login.');show('login');}
+async function registerUser(){if(!api())return m('Set API Base URL dulu dalam app utama.');const fullName=rName.value.trim(),email=rEmail.value.trim(),password=rPass.value;const r=await fetch(api()+'/auth/register-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullName,email,password})});const d=await r.json();if(!r.ok)return m(d.error||'Register gagal');m('Register berjaya ✅ Sila login.');show('login');}
 async function requestCode(){if(!api())return m('Set API Base URL dulu.');const email=fEmail.value.trim();const r=await fetch(api()+'/auth/request-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();if(!r.ok)return m(d.error||'Gagal minta kod');m('Kod reset: '+(d.resetCode||'semak email'))}
 async function confirmReset(){if(!api())return m('Set API Base URL dulu.');const email=fEmail.value.trim(),code=fCode.value.trim(),newPassword=fNew.value;const r=await fetch(api()+'/auth/confirm-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword})});const d=await r.json();if(!r.ok)return m(d.error||'Reset gagal');m('Password berjaya direset. Sila login.');show('login');}
 </script>
-</body></html>
+</body>
+</html>
