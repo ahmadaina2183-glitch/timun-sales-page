@@ -40,7 +40,8 @@
   </div>
 
   <script>
-    let role='user';
+    const qRole = new URLSearchParams(location.search).get('role');
+    let role = qRole || 'user';
     const API_KEY='arrahnu_sync_cfg_v1';
     const AUTH_KEY='arrahnu_auth_token_v1';
     const PROFILE_KEY='arrahnu_profile_v1';
@@ -49,6 +50,13 @@
       role=r;
       document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.role===r));
       document.getElementById('msg').textContent='Role semasa: '+r;
+    }
+
+    setRole(role);
+    if(qRole){
+      document.querySelectorAll('.tab').forEach(t=>t.style.display='none');
+      const tab=document.querySelector(`.tab[data-role="${qRole}"]`);
+      if(tab){tab.style.display='block';tab.classList.add('active');}
     }
 
     async function loginNow(){
