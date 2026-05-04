@@ -3,128 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Timun Segar Kampung — Sales Page Complete</title>
-  <meta name="description" content="Timun segar premium petik pagi. Promo terhad, penghantaran pantas dan jaminan puas hati." />
+  <title>Timun Segar Kampung | Landing Jualan Lengkap</title>
+  <meta name="description" content="Landing page jualan lengkap produk timun: pakej, testimoni, jaminan, FAQ, CTA dan form order." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0d2519; --bg2:#123625; --card:#184832;
-      --lime:#dfff72; --green:#58d991; --txt:#eaf9f0; --muted:#b7d5c4;
-    }
+    :root{--bg:#0c2217;--bg2:#123826;--card:#184731;--lime:#ddff6f;--green:#58d991;--txt:#edfaf2;--muted:#b6d4c3;--danger:#ff8f8f}
     *{box-sizing:border-box} html,body{margin:0}
-    body{font-family:"DM Sans",sans-serif;color:var(--txt);background:radial-gradient(circle at 10% 10%, #1f5d3d 0%, var(--bg) 45%), linear-gradient(180deg,var(--bg),#08170f);line-height:1.5}
-    .container{max-width:1120px;margin:auto;padding:22px}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-    .badge{background:#0b2217;border:1px solid #2f7854;color:var(--green);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px}
-    .btn{display:inline-block;background:var(--lime);color:#0f2e1e;text-decoration:none;padding:14px 22px;border-radius:14px;font-weight:800;transition:.2s;box-shadow:0 12px 26px rgba(223,255,114,.32)}
-    .btn:hover{transform:translateY(-2px)}
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:center;padding:34px 0}
-    h1,h2{font-family:"Bebas Neue",sans-serif;letter-spacing:.8px;margin:0}
-    h1{font-size:clamp(54px,9vw,116px);line-height:.9}.highlight{color:var(--lime)}
-    .lead{font-size:20px;color:var(--muted);max-width:620px}
-    .panel{background:linear-gradient(160deg, rgba(30,93,61,.9), rgba(18,55,37,.96));border:1px solid rgba(166,220,185,.35);border-radius:22px;padding:22px}
-    .price{font-family:"Bebas Neue";font-size:50px}.old{font-size:24px;opacity:.6;text-decoration:line-through;margin-left:8px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .card{background:var(--card);border:1px solid rgba(147,206,170,.2);padding:18px;border-radius:16px}
-    .card p{margin:6px 0 0;color:var(--muted)}
-    .section{margin-top:56px}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    ul{padding-left:18px}
-    .testimonial{background:#153d2b;border:1px solid rgba(170,218,186,.2);padding:16px;border-radius:14px}
-    .faq details{background:#143a29;padding:14px 16px;border-radius:12px;border:1px solid rgba(157,214,178,.2)}
-    .faq details+details{margin-top:10px}
-    .cta{margin-top:58px;text-align:center;padding:34px;background:linear-gradient(145deg,#274f38,#173726);border:1px solid rgba(146,214,171,.35);border-radius:22px}
-    .cta h2{font-size:58px}
-    .count{display:inline-block;background:#0b2217;border:1px solid #306e4f;padding:8px 12px;border-radius:999px;font-size:14px;color:#bfe8cd;margin:12px 0}
-    .form{margin-top:14px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
-    input{width:100%;padding:12px;border-radius:10px;border:1px solid #3e7f5d;background:#0f2b1d;color:#effff6}
-    footer{margin:42px 0 10px;color:#97bda7;font-size:13px;text-align:center}
-    @media(max-width:900px){.hero,.grid3,.split,.form{grid-template-columns:1fr}.cta h2{font-size:42px}}
+    body{font-family:"DM Sans",sans-serif;color:var(--txt);background:radial-gradient(circle at 20% 10%,#1f5d3d,var(--bg) 45%),linear-gradient(180deg,var(--bg),#08150f);line-height:1.5}
+    .container{max-width:1140px;margin:auto;padding:20px}
+    h1,h2,h3{font-family:"Bebas Neue",sans-serif;letter-spacing:.8px;margin:0}
+    h1{font-size:clamp(56px,9vw,118px);line-height:.88}
+    h2{font-size:clamp(34px,5vw,60px)}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .badge{background:#0b2016;border:1px solid #306f4f;color:var(--green);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700}
+    .btn{display:inline-block;text-decoration:none;background:var(--lime);color:#102c1e;padding:14px 20px;border-radius:12px;font-weight:800;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(221,255,111,.3)}
+    .btn.alt{background:#224b35;color:#d7f4e1;border:1px solid #3c7a59;box-shadow:none}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center;padding:28px 0 10px}
+    .lead{font-size:20px;color:var(--muted);max-width:630px}
+    .hero-card,.card,.testi,.faq details,.price-card{background:linear-gradient(165deg,rgba(29,90,59,.95),rgba(20,56,38,.95));border:1px solid rgba(162,216,182,.28);border-radius:18px;padding:18px}
+    .hero-card .price{font-family:"Bebas Neue";font-size:52px}.old{font-size:23px;opacity:.6;text-decoration:line-through;margin-left:8px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .section{margin-top:50px}
+    .card p,.muted{color:var(--muted)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .price-card.pop{outline:2px solid var(--lime);transform:translateY(-3px)}
+    .price-big{font-family:"Bebas Neue";font-size:44px}
+    .save{color:var(--lime);font-weight:700;font-size:14px}
+    ul{padding-left:18px;margin:8px 0}
+    .guarantee{border:1px dashed #82c8a0;padding:14px;border-radius:12px;background:#143828}
+    .faq details{margin-bottom:8px}
+    .urgency{display:inline-block;padding:7px 12px;border-radius:999px;background:#261c1c;border:1px solid #5f3232;color:#ffc6c6;font-size:13px}
+    .cta{margin-top:52px;text-align:center;padding:30px;background:linear-gradient(150deg,#254f38,#163726);border:1px solid rgba(142,209,167,.32);border-radius:20px}
+    .order{max-width:860px;margin:16px auto 0;display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:8px}
+    input,select{padding:12px;border-radius:10px;border:1px solid #3f7f5e;background:#0f2a1d;color:#f0fff6;width:100%}
+    .small{font-size:13px;color:#99bca8}
+    .sticky{position:fixed;left:0;right:0;bottom:0;background:rgba(8,21,14,.92);border-top:1px solid #2f6f4f;padding:10px 14px;display:flex;gap:10px;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+    .sticky .txt{font-size:14px;color:#ccead8}
+    footer{margin:40px 0 72px;text-align:center;color:#97bba7;font-size:13px}
+    @media(max-width:950px){.hero,.grid3,.split,.pricing,.order{grid-template-columns:1fr}.price-card.pop{transform:none}}
   </style>
 </head>
 <body>
   <div class="container">
     <header class="top">
-      <div class="badge">🥒 Fresh Harvest • Hantar Hari Sama (kawasan terpilih)</div>
-      <a class="btn" href="#order">Order Sekarang</a>
+      <div class="badge">🥒 TIMUN SEGAR PETIK PAGI • SIAP POS HARI YANG SAMA</div>
+      <a href="#order" class="btn">Order Sekarang</a>
     </header>
 
     <section class="hero">
       <div>
-        <h1>TIMUN SEGAR <span class="highlight">PETIK PAGI</span></h1>
-        <p class="lead">Untuk salad, jus, acar atau makan terus. Rangup, berair, dan rasa fresh sebenar dari ladang.</p>
-        <a class="btn" href="#order">Saya Nak Promo 🔥</a>
+        <h1>TIMUN FRESH <span style="color:var(--lime)">TERUS DARI LADANG</span></h1>
+        <p class="lead">Kalau bos nak timun yang rangup, berair, tak cepat lembik — ini dia. Sesuai untuk rumah, meal prep, peniaga kecil dan sesiapa yang nak stok sayur berkualiti.</p>
+        <p><a class="btn" href="#pricing">Tengok Pakej Promo</a> <a class="btn alt" href="#testi">Baca Testimoni</a></p>
       </div>
-      <aside class="panel">
-        <strong>Pakej Promo Minggu Ini</strong>
+      <aside class="hero-card">
+        <strong>Offer Hari Ini</strong>
         <div class="price">RM19 <span class="old">RM29</span></div>
-        <p>1 kotak ±2kg timun premium</p>
+        <div class="save">Jimat RM10 untuk pakej basic</div>
         <ul>
-          <li>✅ Petik pagi, packing petang</li>
-          <li>✅ Timun grade A dipilih manual</li>
-          <li>✅ Jaminan fresh 100% atau ganti</li>
+          <li>✅ Grade A dipilih manual</li>
+          <li>✅ QC sebelum packing</li>
+          <li>✅ Fresh guarantee (replace/refund)</li>
         </ul>
+        <span class="urgency">⚠️ Stok promo terhad setiap hari</span>
       </aside>
     </section>
 
     <section class="section grid3">
-      <article class="card"><strong>💧 Berair & Crisp</strong><p>Tekstur padu, tak lembik. Sesuai cuaca panas.</p></article>
-      <article class="card"><strong>🌱 Natural Finish</strong><p>Kurang wax, mudah cuci, terus boleh guna.</p></article>
-      <article class="card"><strong>🚚 Fast Delivery</strong><p>Order awal, peluang tinggi sampai hari sama.</p></article>
+      <article class="card"><h3>💧 Crisp & Juicy</h3><p>Tekstur padu, sesuai salad, acar, jus dan makan cicah sambal.</p></article>
+      <article class="card"><h3>🌱 Cleaner Surface</h3><p>Kurang wax, senang cuci dan terus guna.</p></article>
+      <article class="card"><h3>🚚 Penghantaran Pantas</h3><p>Order sebelum cut-off, peluang sampai hari sama untuk zon terpilih.</p></article>
+    </section>
+
+    <section id="pricing" class="section">
+      <h2>Pilihan Pakej (Best Seller Tengah)</h2>
+      <div class="pricing">
+        <article class="price-card">
+          <h3>Basic Pack</h3>
+          <div class="price-big">RM19</div>
+          <p class="muted">±2kg timun premium</p>
+          <ul><li>1 kotak timun</li><li>Sesuai try first time</li><li>Fresh guarantee</li></ul>
+        </article>
+        <article class="price-card pop">
+          <h3>Family Pack ⭐</h3>
+          <div class="price-big">RM49</div>
+          <p class="muted">±6kg + bonus resipi</p>
+          <ul><li>3 kotak timun</li><li>Free eBook 7 resipi timun</li><li>Priority packing</li></ul>
+          <div class="save">Paling ramai pilih</div>
+        </article>
+        <article class="price-card">
+          <h3>Borong Mini</h3>
+          <div class="price-big">RM139</div>
+          <p class="muted">±20kg untuk peniaga</p>
+          <ul><li>Harga per kg lebih rendah</li><li>Sesuai kedai makan/booth</li><li>Support repeat weekly</li></ul>
+        </article>
+      </div>
     </section>
 
     <section class="section split">
       <div class="card">
-        <h2>Kenapa ramai repeat order?</h2>
+        <h2>Apa Bos Dapat</h2>
         <ul>
-          <li>Saiz konsisten, senang portioning</li>
-          <li>Tahan lebih lama bila simpan betul</li>
-          <li>Sesuai untuk keluarga & peniaga kecil</li>
-          <li>Harga promosi direct-to-consumer</li>
+          <li>Timun premium grade A</li>
+          <li>Packing selamat + label tarikh</li>
+          <li>Panduan simpan supaya tahan lama</li>
+          <li>Support WhatsApp selepas order</li>
         </ul>
       </div>
       <div class="card">
-        <h2>Siapa sesuai beli?</h2>
+        <h2>Bonus (Family Pack)</h2>
         <ul>
-          <li>Mak-mak yang masak setiap hari</li>
-          <li>Orang diet / detox</li>
-          <li>Peniaga nasi campur / salad booth</li>
-          <li>Sesiapa nak stok sayur fresh mingguan</li>
+          <li>eBook “7 Menu Timun 10 Minit”</li>
+          <li>Template meal-prep mingguan</li>
+          <li>Tips detox water ikut citarasa</li>
         </ul>
+      </div>
+    </section>
+
+    <section id="testi" class="section">
+      <h2>Testimoni Real Customer</h2>
+      <div class="split">
+        <div class="testi">“Saya biasa beli supermarket, tapi ni jauh lagi fresh. Crunch dia padu.” — <strong>Syaza, Setia Alam</strong></div>
+        <div class="testi">“Order untuk kedai. Mudah sebab saiz konsisten dan tak banyak reject.” — <strong>Aiman, Bangi</strong></div>
       </div>
     </section>
 
     <section class="section">
-      <h2 style="font-size:48px;margin-bottom:10px">Testimoni Pelanggan</h2>
-      <div class="split">
-        <div class="testimonial">“Mmg fresh. Anak saya yang tak suka sayur pun makan timun ni cicah sambal kicap.” — <strong>Nora, Shah Alam</strong></div>
-        <div class="testimonial">“Sebelum ni cepat lembik. Yang ni tahan lama & texture puas hati.” — <strong>Hafiz, Bangi</strong></div>
+      <div class="guarantee">
+        <h3>Jaminan 100% Puas Hati</h3>
+        <p class="muted">Kalau produk tak fresh masa sampai, maklum dalam 2 jam beserta gambar. Kami buat <strong>replace atau refund</strong> ikut kes. Zero risk untuk bos cuba.</p>
       </div>
     </section>
 
     <section class="section faq">
-      <h2 style="font-size:48px;margin-bottom:10px">Soalan Lazim</h2>
-      <details><summary>Macam mana penghantaran dibuat?</summary><p>Kami guna rider tempatan / courier bergantung zon. Timun dibungkus dengan ventilasi sesuai.</p></details>
-      <details><summary>Kalau timun tak fresh bila sampai?</summary><p>Ambil gambar dalam 2 jam lepas terima. Kami akan ganti/refund ikut kes.</p></details>
-      <details><summary>Boleh beli borong?</summary><p>Boleh. Untuk 20kg ke atas, WhatsApp untuk harga borong khas.</p></details>
+      <h2>FAQ</h2>
+      <details><summary>Area mana boleh hantar hari sama?</summary><p>Kawasan terpilih Lembah Klang. Luar kawasan guna courier next-day.</p></details>
+      <details><summary>Bayaran macam mana?</summary><p>FPX/online transfer. COD ikut coverage rider semasa.</p></details>
+      <details><summary>Boleh custom kuantiti?</summary><p>Boleh, especially untuk peniaga. WhatsApp je kuantiti yang bos nak.</p></details>
+      <details><summary>Berapa lama timun tahan?</summary><p>Biasanya 5-8 hari ikut cara simpan. Kami beri guide simpanan selepas order.</p></details>
     </section>
 
     <section id="order" class="cta">
-      <h2>STOK TERHAD HARI INI</h2>
-      <div class="count">⏳ Promo tamat malam ni, 11:59 PM</div>
-      <p>Isi detail ringkas atau terus WhatsApp untuk lock promo RM19.</p>
-      <form class="form" onsubmit="event.preventDefault();window.location.href='https://wa.me/60123456789?text=Saya%20nak%20order%20timun%20promo%20RM19';">
-        <input type="text" placeholder="Nama" required>
-        <input type="tel" placeholder="No. WhatsApp" required>
-        <button class="btn" type="submit">Lock Promo</button>
+      <h2>LOCK HARGA PROMO SEKARANG</h2>
+      <p class="small">Isi form ringkas ni. Lepas submit, terus redirect ke WhatsApp untuk pengesahan order.</p>
+      <form class="order" onsubmit="submitOrder(event)">
+        <input id="nama" type="text" placeholder="Nama" required>
+        <input id="phone" type="tel" placeholder="No. WhatsApp" required>
+        <select id="pakej" required>
+          <option value="Basic Pack RM19">Basic Pack RM19</option>
+          <option value="Family Pack RM49">Family Pack RM49 (Best Seller)</option>
+          <option value="Borong Mini RM139">Borong Mini RM139</option>
+        </select>
+        <button class="btn" type="submit">Submit & WhatsApp</button>
       </form>
-      <p style="margin-top:10px"><a class="btn" href="https://wa.me/60123456789?text=Saya%20nak%20order%20timun%20promo%20RM19">Terus WhatsApp</a></p>
-      <small style="color:#a7c8b3">Bayaran: FPX / Transfer / COD (terpilih)</small>
+      <p style="margin-top:12px"><a class="btn alt" href="https://wa.me/60123456789?text=Saya%20nak%20order%20timun">Terus WhatsApp Tanpa Form</a></p>
+      <p class="small">Dengan submit, bos setuju dihubungi untuk urusan penghantaran sahaja.</p>
     </section>
 
-    <footer>© 2026 Timun Segar Kampung • Fresh or Replace Guarantee</footer>
+    <footer>© 2026 Timun Segar Kampung • Untuk pertanyaan borong: WhatsApp admin.</footer>
   </div>
+
+  <div class="sticky">
+    <div class="txt">Promo tengah jalan — jangan terlepas harga RM19</div>
+    <a class="btn" href="#order">Order Sekarang</a>
+  </div>
+
+  <script>
+    function submitOrder(e){
+      e.preventDefault();
+      const nama = document.getElementById('nama').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const pakej = document.getElementById('pakej').value;
+      const txt = `Hi admin, saya ${nama}. Nak order ${pakej}. No saya: ${phone}.`;
+      window.location.href = 'https://wa.me/60123456789?text=' + encodeURIComponent(txt);
+    }
+  </script>
 </body>
 </html>
