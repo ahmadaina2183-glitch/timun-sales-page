@@ -112,8 +112,10 @@
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn alt" onclick="saveSyncConfig()">Simpan Konfigurasi</button>
         <button class="btn alt" onclick="loginStaff()">Login Staff</button>
+        <button class="btn alt" onclick="logoutStaff()">Logout</button>
         <button class="btn alt" onclick="syncNow()">Sync Sekarang</button>
         <button class="btn alt" onclick="enableProperPush()">Aktifkan Web Push</button>
+        <button class="btn alt" onclick="pushTest()">Push Test</button>
       </div>
       <div id="syncStatus" class="muted" style="margin-top:8px"></div>
     </section>
@@ -124,10 +126,13 @@
     const OPS_KEY='arrahnu_pending_ops_v1';
     const CFG_KEY='arrahnu_sync_cfg_v1';
     const AUTH_KEY='arrahnu_auth_token_v1';
+    const CLIENT_KEY='arrahnu_client_id_v1';
     let records = JSON.parse(localStorage.getItem(KEY)||'[]');
     let pendingOps = JSON.parse(localStorage.getItem(OPS_KEY)||'[]');
     let syncCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{"apiBase":"","vapidKey":""}');
     let authToken = localStorage.getItem(AUTH_KEY)||'';
+    let clientId = localStorage.getItem(CLIENT_KEY)||crypto.randomUUID();
+    localStorage.setItem(CLIENT_KEY, clientId);
     if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.js';
 
     const rm=v=>`RM ${Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
@@ -298,7 +303,7 @@
     function setSyncStatus(msg){document.getElementById('syncStatus').textContent=msg;}
 
     async function authFetch(url, options={}){
-      const headers = { ...(options.headers||{}), 'Content-Type':'application/json' };
+      const headers = { ...(options.headers||{}), 'Content-Type':'application/json', 'x-client-id': clientId };
       if(authToken) headers.Authorization = `Bearer ${authToken}`;
       return fetch(url, { ...options, headers });
     }
@@ -315,6 +320,34 @@
       authToken=data.token||'';
       localStorage.setItem(AUTH_KEY,authToken);
       setSyncStatus('Login staff berjaya ✅');
+      await verifySession();
+    }
+
+    async function verifySession(){
+      if(!authToken || !syncCfg.apiBase) return;
+      try{
+        const res = await authFetch(syncCfg.apiBase.replace(/\/$/,'')+'/auth/me',{method:'GET'});
+        if(!res.ok) throw new Error('session invalid');
+        const data = await res.json();
+        setSyncStatus(`Login aktif: ${data.user.email} (${data.user.role})`);
+      }catch{
+        authToken=''; localStorage.removeItem(AUTH_KEY);
+        setSyncStatus('Sesi tamat. Sila login semula.');
+      }
+    }
+
+    function logoutStaff(){
+      authToken='';
+      localStorage.removeItem(AUTH_KEY);
+      setSyncStatus('Logout berjaya.');
+    }
+
+    async function pushTest(){
+      if(!syncCfg.apiBase) return setSyncStatus('Isi API Base URL dulu.');
+      const res = await authFetch(syncCfg.apiBase.replace(/\/$/,'')+'/arrahnu/push-test',{method:'POST',body:JSON.stringify({title:'Ar-Rahnu',body:'Push test berjaya',url:location.pathname})});
+      if(!res.ok) return setSyncStatus('Push test gagal (login/admin check).');
+      const d = await res.json();
+      setSyncStatus(`Push test hantar: ${d.sent}/${d.total}`);
     }
 
     async function syncNow(){
@@ -369,6 +402,7 @@
     setInterval(notifyCheck,60000);
     setInterval(()=>{ if(navigator.onLine && pendingOps.length) syncNow(); },120000);
     window.addEventListener('online', ()=>syncNow());
+    verifySession();
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
