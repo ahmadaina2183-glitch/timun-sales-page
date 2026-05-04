@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Staff Dashboard Ar-Rahnu</title>
+  <style>
+    body{font-family:Arial;background:#0f1722;color:#eef4fb;margin:0;padding:14px}.wrap{max-width:1150px;margin:auto}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi,.card{background:#152131;border:1px solid #30405b;border-radius:12px;padding:12px}
+    .kpi b{font-size:24px} input,select{padding:9px;border-radius:8px;border:1px solid #3a4d6c;background:#0f1724;color:#fff} button{padding:9px 12px;border:none;border-radius:8px;background:#9ce84d;font-weight:700;color:#13200a;cursor:pointer}
+    table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #2f3e59;padding:8px;text-align:left}.row{display:flex;gap:8px;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Staff Dashboard — User Subscription Management</h2>
+  <div id="msg"></div>
+
+  <div class="grid" id="kpi" style="margin-bottom:12px"></div>
+
+  <div class="card">
+    <h3>CRUD User + Subscription</h3>
+    <div class="row">
+      <input id="uName" placeholder="Nama" />
+      <input id="uEmail" placeholder="Email" />
+      <input id="uPass" placeholder="Password (optional update)" />
+      <select id="uPlan"><option value="basic">basic</option><option value="pro">pro</option><option value="vip">vip</option></select>
+      <input id="uStart" type="date" />
+      <input id="uExpire" type="date" />
+      <select id="uActive"><option value="true">active</option><option value="false">inactive</option></select>
+      <button onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>User List</h3>
+    <table><thead><tr><th>Email</th><th>Nama</th><th>Plan</th><th>Start</th><th>Expire</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table>
+  </div>
+</div>
+<script>
+const cfg=JSON.parse(localStorage.getItem('arrahnu_sync_cfg_v1')||'{}');
+const token=localStorage.getItem('arrahnu_auth_token_v1')||'';
+const base=(cfg.apiBase||'').replace(/\/$/,'');
+const demoMode=!base||!token;
+let demoUsers=JSON.parse(localStorage.getItem('demo_users_staff')||'[{"email":"user1@demo.my","full_name":"Ali","sub_plan":"basic","sub_start":"2026-05-01","sub_expire":"2026-06-01","is_active":true}]');
+const msg=t=>document.getElementById('msg').textContent=t;
+async function api(path,opt={}){return fetch(base+path,{...opt,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(opt.headers||{})}})}
+
+function daysLeft(dt){if(!dt)return null;return Math.ceil((new Date(dt)-new Date())/86400000)}
+function renderKpi(list){
+  const total=list.length, active=list.filter(x=>x.is_active).length;
+  const expSoon=list.filter(x=>{const d=daysLeft(x.sub_expire); return d!==null && d<=7 && d>=0}).length;
+  const expired=list.filter(x=>{const d=daysLeft(x.sub_expire); return d!==null && d<0}).length;
+  document.getElementById('kpi').innerHTML=`<div class='kpi'><small>Total User</small><br><b>${total}</b></div><div class='kpi'><small>Active</small><br><b>${active}</b></div><div class='kpi'><small>Expire ≤ 7 hari</small><br><b>${expSoon}</b></div><div class='kpi'><small>Expired</small><br><b>${expired}</b></div>`;
+}
+
+async function load(){
+  if(demoMode){
+    msg('Demo mode: tanpa login/backend.');
+    renderKpi(demoUsers);
+    document.getElementById('rows').innerHTML=demoUsers.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${u.sub_start||'-'}</td><td>${u.sub_expire||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button></td></tr>`).join('');
+    return;
+  }
+  const r=await api('/users/list'); const d=await r.json(); if(!r.ok) return msg(d.error||'No access');
+  const list=d.users||[]; renderKpi(list);
+  document.getElementById('rows').innerHTML=list.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${(u.sub_start||'').slice(0,10)||'-'}</td><td>${(u.sub_expire||'').slice(0,10)||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button></td></tr>`).join('');
+  window._users=list;
+}
+
+function fillUser(email){
+  const list=demoMode?demoUsers:(window._users||[]);
+  const u=list.find(x=>x.email===email); if(!u) return;
+  uName.value=u.full_name||''; uEmail.value=u.email||''; uPlan.value=u.sub_plan||'basic'; uStart.value=(u.sub_start||'').slice(0,10); uExpire.value=(u.sub_expire||'').slice(0,10); uActive.value=String(!!u.is_active);
+}
+
+async function saveUser(){
+  const payload={email:uEmail.value.trim(),fullName:uName.value.trim(),password:uPass.value||'User@1234',subPlan:uPlan.value,subStart:uStart.value||null,subExpire:uExpire.value||null,isActive:uActive.value==='true'};
+  if(!payload.email) return msg('Email required');
+  if(demoMode){
+    demoUsers=demoUsers.filter(x=>x.email!==payload.email).concat([{email:payload.email,full_name:payload.fullName,sub_plan:payload.subPlan,sub_start:payload.subStart,sub_expire:payload.subExpire,is_active:payload.isActive}]);
+    localStorage.setItem('demo_users_staff',JSON.stringify(demoUsers));
+    msg('User disimpan (demo).'); return load();
+  }
+  const r=await api('/users/create',{method:'POST',body:JSON.stringify(payload)}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('User disimpan'); load();
+}
+
+async function delUser(email){
+  if(!confirm('Padam '+email+'?')) return;
+  if(demoMode){demoUsers=demoUsers.filter(x=>x.email!==email);localStorage.setItem('demo_users_staff',JSON.stringify(demoUsers));return load();}
+  const r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load();
+}
+
+load();
+</script>
+</body>
+</html>

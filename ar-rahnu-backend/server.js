@@ -25,7 +25,11 @@ async function initDb() {
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_subscriptions (endpoint TEXT PRIMARY KEY, subscription JSONB NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_staff_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'staff', token_version INT NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_audit_logs (id BIGSERIAL PRIMARY KEY, actor_email TEXT, action TEXT NOT NULL, target TEXT, meta JSONB, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
-  await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_app_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, full_name TEXT, token_version INT NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_app_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, full_name TEXT, sub_plan TEXT, sub_start DATE, sub_expire DATE, is_active BOOLEAN NOT NULL DEFAULT TRUE, token_version INT NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
+  await pool.query(`ALTER TABLE arrahnu_app_users ADD COLUMN IF NOT EXISTS sub_plan TEXT;`);
+  await pool.query(`ALTER TABLE arrahnu_app_users ADD COLUMN IF NOT EXISTS sub_start DATE;`);
+  await pool.query(`ALTER TABLE arrahnu_app_users ADD COLUMN IF NOT EXISTS sub_expire DATE;`);
+  await pool.query(`ALTER TABLE arrahnu_app_users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_password_resets (email TEXT PRIMARY KEY, code TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
 
   // Seed 1 admin from env if missing
@@ -63,6 +67,7 @@ async function auth(req, res, next) {
   }
 }
 function adminOnly(req,res,next){ if(req.user?.role!=='admin') return res.status(403).json({ok:false,error:'Admin only'}); next(); }
+function staffOrAdmin(req,res,next){ if(!['staff','admin'].includes(req.user?.role)) return res.status(403).json({ok:false,error:'Staff/Admin only'}); next(); }
 
 app.post('/auth/register-user', async (req, res) => {
   const { email = '', password = '', fullName = '' } = req.body || {};
@@ -192,21 +197,24 @@ app.delete('/staff/:email', auth, adminOnly, async (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/users/list', auth, adminOnly, async (req, res) => {
-  const q = await pool.query('SELECT email, full_name, created_at FROM arrahnu_app_users ORDER BY created_at DESC');
+app.get('/users/list', auth, staffOrAdmin, async (req, res) => {
+  const q = await pool.query('SELECT email, full_name, sub_plan, sub_start, sub_expire, is_active, created_at FROM arrahnu_app_users ORDER BY created_at DESC');
   res.json({ ok: true, users: q.rows });
 });
 
-app.post('/users/create', auth, adminOnly, async (req, res) => {
-  const { email = '', fullName = '', password = 'User@1234' } = req.body || {};
+app.post('/users/create', auth, staffOrAdmin, async (req, res) => {
+  const { email = '', fullName = '', password = 'User@1234', subPlan = 'basic', subStart = null, subExpire = null, isActive = true } = req.body || {};
   if (!email) return res.status(400).json({ ok: false, error: 'email required' });
   const hash = await bcrypt.hash(password, 10);
-  await pool.query(`INSERT INTO arrahnu_app_users (email, full_name, password_hash) VALUES ($1,$2,$3) ON CONFLICT (email) DO UPDATE SET full_name=EXCLUDED.full_name`, [email, fullName || null, hash]);
-  await logAudit(req.user.email, 'user.upsert_admin', email);
+  await pool.query(`INSERT INTO arrahnu_app_users (email, full_name, password_hash, sub_plan, sub_start, sub_expire, is_active)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7)
+                    ON CONFLICT (email) DO UPDATE SET full_name=EXCLUDED.full_name, sub_plan=EXCLUDED.sub_plan, sub_start=EXCLUDED.sub_start, sub_expire=EXCLUDED.sub_expire, is_active=EXCLUDED.is_active`,
+    [email, fullName || null, hash, subPlan || null, subStart || null, subExpire || null, isActive]);
+  await logAudit(req.user.email, 'user.upsert_staff', email);
   res.json({ ok: true });
 });
 
-app.delete('/users/:email', auth, adminOnly, async (req, res) => {
+app.delete('/users/:email', auth, staffOrAdmin, async (req, res) => {
   const email = req.params.email;
   await pool.query('DELETE FROM arrahnu_app_users WHERE email=$1', [email]);
   await logAudit(req.user.email, 'user.delete_admin', email);
