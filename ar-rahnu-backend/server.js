@@ -3,11 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import webpush from 'web-push';
 import { Pool } from 'pg';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8787;
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+const JWT_SECRET = process.env.JWT_SECRET || 'change-me';
 
 if (!process.env.DATABASE_URL) {
   console.error('Missing DATABASE_URL in env');
@@ -42,14 +45,53 @@ async function initDb() {
   `);
 }
 
+function auth(req, res, next) {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+  if (!token) return res.status(401).json({ ok: false, error: 'Missing token' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ ok: false, error: 'Invalid token' });
+  }
+}
+
+function getStaffConfig() {
+  return {
+    email: process.env.STAFF_EMAIL || '',
+    pass: process.env.STAFF_PASSWORD || '',
+    passHash: process.env.STAFF_PASSWORD_HASH || ''
+  };
+}
+
+app.post('/auth/login', async (req, res) => {
+  const { email = '', password = '' } = req.body || {};
+  const staff = getStaffConfig();
+  if (!staff.email) return res.status(500).json({ ok: false, error: 'Staff belum dikonfigurasi' });
+  if (email !== staff.email) return res.status(401).json({ ok: false, error: 'Login gagal' });
+
+  let valid = false;
+  if (staff.passHash) valid = await bcrypt.compare(password, staff.passHash);
+  else valid = password === staff.pass;
+
+  if (!valid) return res.status(401).json({ ok: false, error: 'Login gagal' });
+
+  const token = jwt.sign({ role: 'staff', email }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ ok: true, token, user: { email, role: 'staff' } });
+});
+
+app.get('/auth/me', auth, (req, res) => {
+  res.json({ ok: true, user: req.user });
+});
+
 app.get('/health', async (req, res) => {
   const q = await pool.query('SELECT NOW() as now');
   res.json({ ok: true, dbTime: q.rows[0].now });
 });
 
-app.post('/arrahnu/sync', async (req, res) => {
+app.post('/arrahnu/sync', auth, async (req, res) => {
   const { records = [], pendingOps = [], clientTs } = req.body || {};
-  const clientId = req.header('x-client-id') || req.ip;
+  const clientId = req.header('x-client-id') || req.user.email;
 
   await pool.query(
     `INSERT INTO arrahnu_clients (client_id, records, pending_ops, updated_at, client_ts)
@@ -65,14 +107,14 @@ app.post('/arrahnu/sync', async (req, res) => {
   res.json({ ok: true, syncedAt: Date.now(), recordsCount: records.length, opsCount: pendingOps.length });
 });
 
-app.get('/arrahnu/sync/:clientId', async (req, res) => {
+app.get('/arrahnu/sync/:clientId', auth, async (req, res) => {
   const { clientId } = req.params;
   const q = await pool.query('SELECT client_id, records, pending_ops, updated_at, client_ts FROM arrahnu_clients WHERE client_id = $1', [clientId]);
   if (!q.rows.length) return res.status(404).json({ ok: false, error: 'Client not found' });
   res.json({ ok: true, data: q.rows[0] });
 });
 
-app.post('/arrahnu/subscribe', async (req, res) => {
+app.post('/arrahnu/subscribe', auth, async (req, res) => {
   const { subscription } = req.body || {};
   if (!subscription?.endpoint) return res.status(400).json({ ok: false, error: 'Invalid subscription' });
 
@@ -88,7 +130,7 @@ app.post('/arrahnu/subscribe', async (req, res) => {
   res.json({ ok: true, totalSubscriptions: c.rows[0].total });
 });
 
-app.post('/arrahnu/push-test', async (req, res) => {
+app.post('/arrahnu/push-test', auth, async (req, res) => {
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
     return res.status(400).json({ ok: false, error: 'Missing VAPID env config' });
   }
@@ -120,9 +162,7 @@ app.get('/arrahnu/vapid-public-key', (req, res) => {
 });
 
 initDb().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Ar-Rahnu backend (Postgres) running on :${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Ar-Rahnu backend (Postgres+Auth) running on :${PORT}`));
 }).catch((err) => {
   console.error('DB init failed:', err);
   process.exit(1);
