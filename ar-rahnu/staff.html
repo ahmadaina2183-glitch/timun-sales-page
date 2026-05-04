@@ -29,7 +29,6 @@
     <div class="muted" id="mode"></div>
     <div class="menu" style="margin-top:10px">
       <button id="m-dashboard" class="active" onclick="show('dashboard')">Dashboard</button>
-      <button id="m-add" onclick="show('add')">Add User</button>
       <button id="m-users" onclick="show('users')">User Management</button>
       <button id="m-subs" onclick="show('subs')">Subscription Management</button>
       <button id="m-profile" onclick="show('profile')">Profile Staff</button>
@@ -97,7 +96,7 @@ document.getElementById('staffProfile').textContent=`Nama/Email: ${profile.email
 
 async function api(path,opt={}){return fetch(base+path,{...opt,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(opt.headers||{})}})}
 
-function show(name){['dashboard','add','users','subs','profile'].forEach(x=>{document.getElementById('p-'+x).classList.toggle('hidden',x!==name);document.getElementById('m-'+x).classList.toggle('active',x===name)}); if(name==='subs') renderSubs();}
+function show(name){['dashboard','add','users','subs','profile'].forEach(x=>{const p=document.getElementById('p-'+x); if(p) p.classList.toggle('hidden',x!==name); const m=document.getElementById('m-'+x); if(m) m.classList.toggle('active',x===name)}); if(name==='subs') renderSubs();}
 
 function renderKpi(){
   const total=users.length, active=users.filter(x=>x.is_active).length, expSoon=users.filter(x=>{const d=daysLeft(x.sub_expire);return d!==null&&d<=7&&d>=0}).length, expired=users.filter(x=>{const d=daysLeft(x.sub_expire);return d!==null&&d<0}).length;
