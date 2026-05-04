@@ -98,11 +98,29 @@
       <h3>Reminder Bulanan (30 hari akan datang)</h3>
       <div id="reminderList" class="muted"></div>
     </section>
+
+    <section class="panel" style="margin-top:12px">
+      <h3>Offline Sync + Push Setup</h3>
+      <div class="row">
+        <div><label>API Base URL</label><input id="apiBase" placeholder="https://api-domain.com" /></div>
+        <div><label>VAPID Public Key</label><input id="vapidKey" placeholder="BElx..." /></div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn alt" onclick="saveSyncConfig()">Simpan Konfigurasi</button>
+        <button class="btn alt" onclick="syncNow()">Sync Sekarang</button>
+        <button class="btn alt" onclick="enableProperPush()">Aktifkan Web Push</button>
+      </div>
+      <div id="syncStatus" class="muted" style="margin-top:8px"></div>
+    </section>
   </div>
 
   <script>
     const KEY='arrahnu_records_v1';
+    const OPS_KEY='arrahnu_pending_ops_v1';
+    const CFG_KEY='arrahnu_sync_cfg_v1';
     let records = JSON.parse(localStorage.getItem(KEY)||'[]');
+    let pendingOps = JSON.parse(localStorage.getItem(OPS_KEY)||'[]');
+    let syncCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{"apiBase":"","vapidKey":""}');
     if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.js';
 
     const rm=v=>`RM ${Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
@@ -115,13 +133,13 @@
     function nextDueDate(r){const s=new Date(r.startDate);const m=monthsElapsed(r.startDate)+1;return addMonths(s,m);}
     function fullRedeemToday(r){return (Number(r.remainingPrincipal||r.principal)||0)+monthlyFee(r)*monthsElapsed(r.startDate)}
 
-    function save(){localStorage.setItem(KEY,JSON.stringify(records));render();}
+    function save(){localStorage.setItem(KEY,JSON.stringify(records));localStorage.setItem(OPS_KEY,JSON.stringify(pendingOps));render();}
     function clearForm(){['customer','ic','refNo','principal','rate','startDate','tenure','item','remainingPrincipal','notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('rate').value=12;document.getElementById('rateMode').value='year';document.getElementById('tenure').value=6;}
     function saveRecord(){
       const r={id:crypto.randomUUID(),customer:v('customer'),ic:v('ic'),refNo:v('refNo')||`SRT-${Date.now()}`,principal:+v('principal')||0,rate:+v('rate')||0,rateMode:v('rateMode')||'year',startDate:v('startDate'),tenure:+v('tenure')||6,item:v('item'),remainingPrincipal:+v('remainingPrincipal')||0,notes:v('notes')};
       if(!r.customer||!r.startDate||!r.principal)return alert('Isi nama, prinsipal, tarikh mula');
       if(!r.remainingPrincipal)r.remainingPrincipal=r.principal;
-      records.unshift(r);save();clearForm();
+      records.unshift(r);queueOp('upsert',r);save();clearForm();
     }
     const v=id=>document.getElementById(id).value.trim();
 
@@ -146,8 +164,8 @@
         ? soon.map(x=>`• ${x.r.refNo} (${x.r.customer}) - ${x.d.toLocaleDateString('ms-MY')} (${x.days<0?'Lewat':x.days+' hari lagi'})`).join('<br>')
         : 'Tiada reminder dalam 30 hari.';
     }
-    function del(id){records=records.filter(r=>r.id!==id);save();}
-    function clearAll(){if(confirm('Padam semua data?')){records=[];save();}}
+    function del(id){records=records.filter(r=>r.id!==id);queueOp('delete',{id});save();}
+    function clearAll(){if(confirm('Padam semua data?')){records=[];queueOp('clear',{});save();}}
 
     async function runOCR(e){
       const f=e.target.files?.[0]; if(!f) return;
@@ -261,6 +279,54 @@
       localStorage.setItem('arrahnu_notified', JSON.stringify(sent));
     }
 
+    function queueOp(type,payload){pendingOps.push({type,payload,ts:Date.now()}); if(pendingOps.length>500) pendingOps=pendingOps.slice(-500);} 
+
+    function saveSyncConfig(){
+      syncCfg.apiBase=v('apiBase');
+      syncCfg.vapidKey=v('vapidKey');
+      localStorage.setItem(CFG_KEY,JSON.stringify(syncCfg));
+      setSyncStatus('Konfigurasi sync disimpan.');
+    }
+
+    function setSyncStatus(msg){document.getElementById('syncStatus').textContent=msg;}
+
+    async function syncNow(){
+      if(!syncCfg.apiBase) return setSyncStatus('Isi API Base URL dulu.');
+      if(!navigator.onLine) return setSyncStatus('Offline. Sync akan cuba semula bila online.');
+      try{
+        setSyncStatus('Sync sedang berjalan...');
+        const res = await fetch(syncCfg.apiBase.replace(/\/$/,'')+'/arrahnu/sync',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({records,pendingOps,clientTs:Date.now()})
+        });
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        pendingOps=[];
+        localStorage.setItem(OPS_KEY,JSON.stringify(pendingOps));
+        localStorage.setItem('arrahnu_last_sync', String(Date.now()));
+        setSyncStatus('Sync berjaya ✅ '+new Date().toLocaleString('ms-MY'));
+      }catch(err){
+        setSyncStatus('Sync gagal: '+err.message);
+      }
+    }
+
+    function urlBase64ToUint8Array(base64String){
+      const padding='='.repeat((4-base64String.length%4)%4);
+      const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+      const raw=atob(base64); const out=new Uint8Array(raw.length);
+      for(let i=0;i<raw.length;++i) out[i]=raw.charCodeAt(i);
+      return out;
+    }
+
+    async function enableProperPush(){
+      if(!syncCfg.apiBase || !syncCfg.vapidKey) return setSyncStatus('Isi API Base URL + VAPID key dulu.');
+      if(!('serviceWorker' in navigator) || !('PushManager' in window)) return setSyncStatus('Push tak disokong browser ni.');
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(syncCfg.vapidKey)});
+      const res = await fetch(syncCfg.apiBase.replace(/\/$/,'')+'/arrahnu/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub})});
+      if(!res.ok) return setSyncStatus('Subscribe push gagal: HTTP '+res.status);
+      setSyncStatus('Web Push aktif ✅');
+    }
+
     function downloadData(){
       const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});
       const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='arrahnu-data.json';a.click();
@@ -271,10 +337,20 @@
     }
 
     render();
+    document.getElementById('apiBase').value = syncCfg.apiBase||'';
+    document.getElementById('vapidKey').value = syncCfg.vapidKey||'';
     setInterval(notifyCheck,60000);
+    setInterval(()=>{ if(navigator.onLine && pendingOps.length) syncNow(); },120000);
+    window.addEventListener('online', ()=>syncNow());
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+      window.addEventListener('load', async () => {
+        const reg = await navigator.serviceWorker.register('./sw.js');
+        if ('sync' in reg) { try { await reg.sync.register('arrahnu-sync'); } catch {} }
+      });
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'AR_RAHNU_SYNC_NOW') syncNow();
+      });
     }
   </script>
 </body>
