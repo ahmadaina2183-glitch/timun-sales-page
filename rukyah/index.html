@@ -3,90 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pusat Rukyah Nur Sejahtera</title>
-  <meta name="description" content="Perkhidmatan rukyah syar'iyyah, konsultasi gangguan, terapi bacaan, dan rawatan berlandaskan Al-Quran & Sunnah." />
+  <title>Rukyah Ar-Rahmah | Versi Premium</title>
+  <meta name="description" content="Perkhidmatan rukyah syar'iyyah premium dengan pendekatan tenang, tersusun, dan berlandaskan Al-Quran & Sunnah." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0a1520;--card:#112233;--gold:#e7c978;--text:#eaf2f8;--muted:#b3c1cc}
-    *{box-sizing:border-box} body{margin:0;font-family:"DM Sans",sans-serif;background:radial-gradient(circle at 20% 10%,#173247,#0a1520 55%);color:var(--text)}
-    .wrap{max-width:1100px;margin:auto;padding:22px}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .logo{font-family:"Cinzel",serif;font-size:22px;color:var(--gold)}
-    .btn{background:var(--gold);color:#1a2630;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700;display:inline-block}
-    .hero{padding:38px 0 20px;display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:center}
-    h1,h2{font-family:"Cinzel",serif;margin:0}
-    h1{font-size:clamp(36px,6vw,68px);line-height:1.03}
-    .lead{font-size:19px;color:var(--muted)}
-    .panel,.card{background:linear-gradient(160deg,#173247,#112233);border:1px solid rgba(231,201,120,.25);padding:18px;border-radius:16px}
+    :root{--bg:#071018;--card:#0f2130;--gold:#e8cc8a;--line:rgba(232,204,138,.25);--text:#edf3f8;--muted:#aebdcb}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% 10%,#163249,#071018 52%),linear-gradient(180deg,#071018,#050b11);color:var(--text);font-family:"Manrope",sans-serif}
+    .wrap{max-width:1160px;margin:auto;padding:24px}
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .brand{font-family:"Cinzel",serif;font-size:22px;letter-spacing:.8px;color:var(--gold)}
+    .btn{display:inline-block;background:var(--gold);color:#19242f;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:700}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:38px 0}
+    h1,h2,h3{font-family:"Cinzel",serif;margin:0}
+    h1{font-size:clamp(38px,6vw,70px);line-height:1.02}
+    h2{font-size:clamp(30px,4vw,50px)}
+    .lead{font-size:19px;color:var(--muted);max-width:620px}
+    .panel,.card,.faq details{background:linear-gradient(160deg,#143247,#0f2130);border:1px solid var(--line);border-radius:18px;padding:18px}
+    .hero-img{width:100%;height:420px;object-fit:cover;border-radius:18px;border:1px solid var(--line)}
+    .pill{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:#d9e8f2;font-size:13px}
+    .section{margin-top:52px}
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .section{margin-top:48px}
-    .card p{margin:8px 0 0;color:var(--muted)}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .faq details{background:#132636;border:1px solid rgba(231,201,120,.18);padding:12px 14px;border-radius:10px;margin-bottom:8px}
-    .cta{text-align:center;padding:30px;background:linear-gradient(150deg,#1a3347,#112333);border:1px solid rgba(231,201,120,.28);border-radius:18px}
-    footer{margin:34px 0 8px;color:#9ab0be;font-size:13px;text-align:center}
-    @media(max-width:900px){.hero,.grid3,.split{grid-template-columns:1fr}}
+    .card p,.muted{color:var(--muted)}
+    ul{padding-left:18px}
+    .faq details{margin-bottom:8px}
+    .cta{text-align:center;padding:34px;background:linear-gradient(150deg,#193850,#0f2130);border:1px solid var(--line);border-radius:20px}
+    footer{text-align:center;margin:34px 0 8px;color:#90a6b7;font-size:13px}
+    @media(max-width:930px){.hero,.grid3,.split{grid-template-columns:1fr}.hero-img{height:300px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header class="top">
-      <div class="logo">Pusat Rukyah Nur Sejahtera</div>
-      <a class="btn" href="#hubungi">Hubungi Sekarang</a>
+    <header class="nav">
+      <div class="brand">RUKYAH AR-RAHMAH</div>
+      <a class="btn" href="#hubungi">Tempah Konsultasi</a>
     </header>
 
     <section class="hero">
       <div>
-        <h1>RUKYAH SYAR'IYYAH BERLANDASKAN AL-QURAN & SUNNAH</h1>
-        <p class="lead">Bimbingan, doa, dan rawatan rukyah secara beradab, tenang, dan profesional. Fokus kepada pemulihan rohani serta pengukuhan ibadah harian.</p>
-        <a class="btn" href="#servis">Lihat Servis</a>
+        <span class="pill">Berlandaskan Al-Quran & Sunnah</span>
+        <h1>Pendekatan Rukyah Yang Tenang, Beradab & Profesional</h1>
+        <p class="lead">Kami bantu anda dan keluarga melalui sesi rukyah syar'iyyah yang tersusun — bermula dengan konsultasi, rawatan, dan pelan amalan susulan yang jelas.</p>
+        <p><a class="btn" href="#servis">Lihat Servis Premium</a></p>
       </div>
-      <aside class="panel">
-        <strong>Perkhidmatan Utama</strong>
-        <ul>
-          <li>Konsultasi awal gangguan</li>
-          <li>Sesi rukyah individu/keluarga</li>
-          <li>Panduan amalan susulan</li>
-          <li>Sokongan selepas rawatan</li>
-        </ul>
-        <small style="color:var(--muted)">*Tidak melibatkan amalan khurafat atau unsur syirik.</small>
-      </aside>
+      <div class="panel">
+        <img class="hero-img" src="assets/hero.png" alt="Suasana pusat rukyah premium" />
+      </div>
     </section>
 
     <section id="servis" class="section grid3">
-      <article class="card"><strong>🕊️ Konsultasi</strong><p>Saringan awal simptom dan sejarah ringkas untuk pelan rawatan sesuai.</p></article>
-      <article class="card"><strong>📖 Sesi Rukyah</strong><p>Bacaan ayat-ayat rukyah, doa, dan nasihat rohani secara tertib.</p></article>
-      <article class="card"><strong>🤲 Susulan</strong><p>Checklist amalan harian: zikir, doa, dan penjagaan rumah.</p></article>
+      <article class="card"><h3>Konsultasi Privasi</h3><p>Penilaian awal yang sensitif dan tersusun, sesuai individu atau keluarga.</p></article>
+      <article class="card"><h3>Sesi Rukyah</h3><p>Bacaan ayat rukyah, doa ma'thur, dan bimbingan rohani secara tertib.</p></article>
+      <article class="card"><h3>Pelan Susulan</h3><p>Panduan amalan harian supaya pemulihan lebih stabil dan berpanjangan.</p></article>
     </section>
 
     <section class="section split">
       <div class="card">
-        <h2>Kenapa Pilih Kami</h2>
+        <h2>Nilai Yang Kami Jaga</h2>
         <ul>
-          <li>Berpegang kepada kaedah syar'iyyah</li>
-          <li>Privasi pelanggan dijaga</li>
-          <li>Penerangan jelas & tidak menakutkan</li>
-          <li>Sesuai untuk lelaki/wanita/keluarga</li>
+          <li>Tiada unsur khurafat / syirik</li>
+          <li>Penjelasan jelas, tidak menakutkan</li>
+          <li>Adab, privasi & maruah pelanggan diutamakan</li>
+          <li>Sesuai wanita, lelaki, dan keluarga</li>
         </ul>
       </div>
       <div class="card faq">
-        <h2>FAQ Ringkas</h2>
-        <details><summary>Adakah rukyah sakit?</summary><p>Setiap orang berbeza. Majoriti rasa lebih tenang selepas sesi.</p></details>
-        <details><summary>Berapa lama satu sesi?</summary><p>Kebiasaannya 45-90 minit bergantung keadaan.</p></details>
-        <details><summary>Boleh buat sesi online?</summary><p>Boleh untuk konsultasi dan panduan asas tertentu.</p></details>
+        <h2>Soalan Lazim</h2>
+        <details><summary>Berapa lama satu sesi?</summary><p>Kebiasaannya 45-90 minit, bergantung kes.</p></details>
+        <details><summary>Boleh konsultasi online?</summary><p>Boleh untuk saringan awal dan bimbingan asas.</p></details>
+        <details><summary>Ada jaminan?</summary><p>Kami fokus ikhtiar syar'ie dan susulan disiplin amalan; hasil berbeza ikut individu.</p></details>
       </div>
     </section>
 
     <section id="hubungi" class="section cta">
-      <h2>Perlukan Bantuan Segera?</h2>
-      <p>Hubungi kami untuk konsultasi awal dan penjadualan sesi.</p>
-      <a class="btn" href="https://wa.me/60123456789?text=Assalamualaikum,%20saya%20nak%20konsultasi%20rukyah">WhatsApp Konsultasi</a>
-      <p style="color:var(--muted);margin-top:10px">Waktu operasi: 10:00 pagi - 10:00 malam</p>
+      <h2>Mulakan Konsultasi Sekarang</h2>
+      <p class="muted">Hubungi kami untuk slot terdekat dan penerangan lanjut.</p>
+      <a class="btn" href="https://wa.me/60123456789?text=Assalamualaikum,%20saya%20nak%20konsultasi%20rukyah%20premium">WhatsApp Admin</a>
+      <p class="muted" style="margin-top:10px">Waktu operasi: 10:00 pagi – 10:00 malam</p>
     </section>
 
-    <footer>© 2026 Pusat Rukyah Nur Sejahtera • Semoga Allah permudah urusan.</footer>
+    <footer>© 2026 Rukyah Ar-Rahmah • Semoga Allah mempermudah urusan.</footer>
   </div>
 </body>
 </html>
