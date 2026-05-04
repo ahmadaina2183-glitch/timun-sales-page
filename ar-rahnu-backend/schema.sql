@@ -11,3 +11,19 @@ CREATE TABLE IF NOT EXISTS arrahnu_subscriptions (
   subscription JSONB NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS arrahnu_staff_users (
+  email TEXT PRIMARY KEY,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'staff',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS arrahnu_audit_logs (
+  id BIGSERIAL PRIMARY KEY,
+  actor_email TEXT,
+  action TEXT NOT NULL,
+  target TEXT,
+  meta JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

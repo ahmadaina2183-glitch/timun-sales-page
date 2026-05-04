@@ -1,6 +1,6 @@
 # Ar-Rahnu Backend (Production Template)
 
-Backend production-ready asas menggunakan **Express + PostgreSQL + JWT Staff Auth + Web Push**.
+Backend production-ready asas menggunakan **Express + PostgreSQL + JWT Staff Auth + Web Push + Audit Log**.
 
 ## 1) Setup
 ```bash
@@ -36,6 +36,9 @@ npm run dev
 ## Endpoint
 - `POST /auth/login`
 - `GET /auth/me`
+- `POST /staff/create` (admin)
+- `GET /staff/list` (admin)
+- `GET /audit/recent` (admin)
 - `GET /health`
 - `POST /arrahnu/sync` (auth)
 - `GET /arrahnu/sync/:clientId` (auth)
