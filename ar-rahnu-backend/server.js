@@ -184,6 +184,35 @@ app.get('/staff/list', auth, adminOnly, async (req, res) => {
   res.json({ ok: true, staff: q.rows });
 });
 
+app.delete('/staff/:email', auth, adminOnly, async (req, res) => {
+  const email = req.params.email;
+  if (email === req.user.email) return res.status(400).json({ ok: false, error: 'Tak boleh padam diri sendiri' });
+  await pool.query('DELETE FROM arrahnu_staff_users WHERE email=$1', [email]);
+  await logAudit(req.user.email, 'staff.delete', email);
+  res.json({ ok: true });
+});
+
+app.get('/users/list', auth, adminOnly, async (req, res) => {
+  const q = await pool.query('SELECT email, full_name, created_at FROM arrahnu_app_users ORDER BY created_at DESC');
+  res.json({ ok: true, users: q.rows });
+});
+
+app.post('/users/create', auth, adminOnly, async (req, res) => {
+  const { email = '', fullName = '', password = 'User@1234' } = req.body || {};
+  if (!email) return res.status(400).json({ ok: false, error: 'email required' });
+  const hash = await bcrypt.hash(password, 10);
+  await pool.query(`INSERT INTO arrahnu_app_users (email, full_name, password_hash) VALUES ($1,$2,$3) ON CONFLICT (email) DO UPDATE SET full_name=EXCLUDED.full_name`, [email, fullName || null, hash]);
+  await logAudit(req.user.email, 'user.upsert_admin', email);
+  res.json({ ok: true });
+});
+
+app.delete('/users/:email', auth, adminOnly, async (req, res) => {
+  const email = req.params.email;
+  await pool.query('DELETE FROM arrahnu_app_users WHERE email=$1', [email]);
+  await logAudit(req.user.email, 'user.delete_admin', email);
+  res.json({ ok: true });
+});
+
 app.post('/staff/change-password', auth, async (req, res) => {
   const { email, oldPassword, newPassword } = req.body || {};
   const targetEmail = email || req.user.email;

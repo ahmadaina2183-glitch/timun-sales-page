@@ -62,7 +62,11 @@ docker compose exec -T db psql -U postgres -d arrahnu < schema.sql
 - `POST /auth/logout-all` (auth)
 - `POST /staff/create` (admin)
 - `GET /staff/list` (admin)
+- `DELETE /staff/:email` (admin)
 - `POST /staff/change-password` (auth)
+- `GET /users/list` (admin)
+- `POST /users/create` (admin)
+- `DELETE /users/:email` (admin)
 - `GET /audit/recent` (admin)
 - `GET /health`
 - `POST /arrahnu/sync` (auth)

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel Ar-Rahnu</title>
+  <style>
+    body{font-family:Arial;margin:0;background:#0f1722;color:#eef4fb;padding:14px} .wrap{max-width:1100px;margin:auto}
+    .card{background:#152131;border:1px solid #30405b;border-radius:12px;padding:12px;margin-bottom:12px}
+    input,select{padding:9px;border-radius:8px;border:1px solid #3a4d6c;background:#0f1724;color:#fff} button{padding:9px 12px;border:none;border-radius:8px;background:#9ce84d;font-weight:700;color:#13200a;cursor:pointer}
+    table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #2f3e59;padding:8px;text-align:left}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Admin Panel — CRUD Staff & User</h2>
+  <div id="msg"></div>
+
+  <div class="card">
+    <h3>Create/Update Staff</h3>
+    <div class="row">
+      <input id="sEmail" placeholder="staff@arrahnu.com" />
+      <input id="sPass" placeholder="password" />
+      <select id="sRole"><option value="staff">staff</option><option value="admin">admin</option></select>
+      <button onclick="saveStaff()">Simpan</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Staff List</h3>
+    <table><thead><tr><th>Email</th><th>Role</th><th>Action</th></tr></thead><tbody id="staffRows"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h3>Create/Update User</h3>
+    <div class="row">
+      <input id="uName" placeholder="Nama" />
+      <input id="uEmail" placeholder="user@mail.com" />
+      <input id="uPass" placeholder="password default: User@1234" />
+      <button onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>User List</h3>
+    <table><thead><tr><th>Email</th><th>Nama</th><th>Action</th></tr></thead><tbody id="userRows"></tbody></table>
+  </div>
+</div>
+
+<script>
+const cfg=JSON.parse(localStorage.getItem('arrahnu_sync_cfg_v1')||'{}');
+const token=localStorage.getItem('arrahnu_auth_token_v1')||'';
+const base=(cfg.apiBase||'').replace(/\/$/,'');
+if(!base||!token){alert('Login admin dulu + set API Base URL');location.href='./login-admin.html';}
+
+const h={'Content-Type':'application/json','Authorization':'Bearer '+token};
+const msg=t=>document.getElementById('msg').textContent=t;
+async function api(path,opt={}){return fetch(base+path,{...opt,headers:{...h,...(opt.headers||{})}})}
+
+async function load(){
+  const s=await api('/staff/list'); const sd=await s.json();
+  if(!s.ok) return msg(sd.error||'No access');
+  document.getElementById('staffRows').innerHTML=(sd.staff||[]).map(x=>`<tr><td>${x.email}</td><td>${x.role}</td><td><button onclick="delStaff('${x.email}')">Padam</button></td></tr>`).join('');
+
+  const u=await api('/users/list'); const ud=await u.json();
+  document.getElementById('userRows').innerHTML=(ud.users||[]).map(x=>`<tr><td>${x.email}</td><td>${x.full_name||'-'}</td><td><button onclick="delUser('${x.email}')">Padam</button></td></tr>`).join('');
+}
+
+async function saveStaff(){
+  const email=sEmail.value.trim(),password=sPass.value,role=sRole.value;
+  const r=await api('/staff/create',{method:'POST',body:JSON.stringify({email,password,role})});
+  const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('Staff disimpan'); load();
+}
+async function delStaff(email){ if(!confirm('Padam staff '+email+'?')) return; const r=await api('/staff/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
+
+async function saveUser(){
+  const email=uEmail.value.trim(),fullName=uName.value.trim(),password=uPass.value||'User@1234';
+  const r=await api('/users/create',{method:'POST',body:JSON.stringify({email,fullName,password})});
+  const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('User disimpan'); load();
+}
+async function delUser(email){ if(!confirm('Padam user '+email+'?')) return; const r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load(); }
+
+load();
+</script>
+</body>
+</html>
