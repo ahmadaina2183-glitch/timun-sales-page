@@ -3,108 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Timun Segar Kampung — Crunch Setiap Gigitan</title>
+  <title>Timun Segar Kampung — Sales Page Complete</title>
+  <meta name="description" content="Timun segar premium petik pagi. Promo terhad, penghantaran pantas dan jaminan puas hati." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0f2f1f;
-      --bg2:#163a27;
-      --lime:#d9ff6b;
-      --green:#59d98e;
-      --text:#eaf7ef;
-      --muted:#bdd8c6;
-      --card:#194731;
+      --bg:#0d2519; --bg2:#123625; --card:#184832;
+      --lime:#dfff72; --green:#58d991; --txt:#eaf9f0; --muted:#b7d5c4;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:"DM Sans", sans-serif;
-      color:var(--text);
-      background: radial-gradient(circle at 20% 20%, #205a3b 0%, var(--bg) 40%), linear-gradient(180deg, var(--bg), #0a1f14);
-      min-height:100vh;
-      overflow-x:hidden;
-    }
-    .glow{position:fixed;inset:auto -20% -30% auto;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle, rgba(217,255,107,.18), transparent 65%);filter:blur(20px);pointer-events:none}
-    .container{max-width:1100px;margin:auto;padding:28px 20px 60px}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
-    .badge{background:#0b2418;border:1px solid #2f7a53;color:var(--green);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px}
-    .btn{display:inline-block;text-decoration:none;background:var(--lime);color:#102e1f;padding:14px 22px;border-radius:14px;font-weight:700;box-shadow:0 10px 30px rgba(217,255,107,.35);transition:.2s}
-    .btn:hover{transform:translateY(-2px) scale(1.01)}
-    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center;margin-top:38px}
-    h1{font-family:"Bebas Neue", sans-serif;font-size:clamp(52px,9vw,114px);line-height:.9;margin:0;letter-spacing:1px}
-    h1 span{color:var(--lime)}
-    .lead{font-size:20px;color:var(--muted);max-width:560px}
-    .panel{background:linear-gradient(165deg, rgba(30,93,61,.85), rgba(21,63,42,.95));border:1px solid rgba(141,206,164,.35);border-radius:22px;padding:22px;box-shadow:0 14px 40px rgba(0,0,0,.3)}
-    .price{font-size:42px;font-family:"Bebas Neue";letter-spacing:1px;margin:6px 0}
-    .old{opacity:.6;text-decoration:line-through;margin-left:8px;font-size:21px}
-    .list{padding-left:18px;color:#d1ebd9}
-    .section{margin-top:62px}
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .card{background:var(--card);padding:18px;border-radius:16px;border:1px solid rgba(133,190,156,.2)}
-    .card h3{margin:0 0 8px;font-size:18px}
-    .card p{margin:0;color:var(--muted)}
-    .cta{margin-top:62px;text-align:center;padding:34px;background:linear-gradient(155deg,#264f38,#193b2a);border:1px solid rgba(146,214,171,.3);border-radius:22px}
-    .cta h2{font-family:"Bebas Neue";letter-spacing:.8px;margin:0 0 10px;font-size:52px}
-    .cta p{margin:0 0 18px;color:var(--muted)}
-    .mini{margin-top:16px;font-size:13px;color:#9dc1ab}
-    @media (max-width:880px){
-      .hero{grid-template-columns:1fr}
-      .cards{grid-template-columns:1fr}
-      .cta h2{font-size:40px}
-    }
+    *{box-sizing:border-box} html,body{margin:0}
+    body{font-family:"DM Sans",sans-serif;color:var(--txt);background:radial-gradient(circle at 10% 10%, #1f5d3d 0%, var(--bg) 45%), linear-gradient(180deg,var(--bg),#08170f);line-height:1.5}
+    .container{max-width:1120px;margin:auto;padding:22px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    .badge{background:#0b2217;border:1px solid #2f7854;color:var(--green);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px}
+    .btn{display:inline-block;background:var(--lime);color:#0f2e1e;text-decoration:none;padding:14px 22px;border-radius:14px;font-weight:800;transition:.2s;box-shadow:0 12px 26px rgba(223,255,114,.32)}
+    .btn:hover{transform:translateY(-2px)}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:center;padding:34px 0}
+    h1,h2{font-family:"Bebas Neue",sans-serif;letter-spacing:.8px;margin:0}
+    h1{font-size:clamp(54px,9vw,116px);line-height:.9}.highlight{color:var(--lime)}
+    .lead{font-size:20px;color:var(--muted);max-width:620px}
+    .panel{background:linear-gradient(160deg, rgba(30,93,61,.9), rgba(18,55,37,.96));border:1px solid rgba(166,220,185,.35);border-radius:22px;padding:22px}
+    .price{font-family:"Bebas Neue";font-size:50px}.old{font-size:24px;opacity:.6;text-decoration:line-through;margin-left:8px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card{background:var(--card);border:1px solid rgba(147,206,170,.2);padding:18px;border-radius:16px}
+    .card p{margin:6px 0 0;color:var(--muted)}
+    .section{margin-top:56px}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    ul{padding-left:18px}
+    .testimonial{background:#153d2b;border:1px solid rgba(170,218,186,.2);padding:16px;border-radius:14px}
+    .faq details{background:#143a29;padding:14px 16px;border-radius:12px;border:1px solid rgba(157,214,178,.2)}
+    .faq details+details{margin-top:10px}
+    .cta{margin-top:58px;text-align:center;padding:34px;background:linear-gradient(145deg,#274f38,#173726);border:1px solid rgba(146,214,171,.35);border-radius:22px}
+    .cta h2{font-size:58px}
+    .count{display:inline-block;background:#0b2217;border:1px solid #306e4f;padding:8px 12px;border-radius:999px;font-size:14px;color:#bfe8cd;margin:12px 0}
+    .form{margin-top:14px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+    input{width:100%;padding:12px;border-radius:10px;border:1px solid #3e7f5d;background:#0f2b1d;color:#effff6}
+    footer{margin:42px 0 10px;color:#97bda7;font-size:13px;text-align:center}
+    @media(max-width:900px){.hero,.grid3,.split,.form{grid-template-columns:1fr}.cta h2{font-size:42px}}
   </style>
 </head>
 <body>
-  <div class="glow"></div>
   <div class="container">
-    <div class="top">
-      <div class="badge">🥒 Fresh Harvest • Hantar Hari Sama</div>
+    <header class="top">
+      <div class="badge">🥒 Fresh Harvest • Hantar Hari Sama (kawasan terpilih)</div>
       <a class="btn" href="#order">Order Sekarang</a>
-    </div>
+    </header>
 
     <section class="hero">
       <div>
-        <h1>TIMUN SEGAR <span>KAMPUNG</span></h1>
-        <p class="lead">Rangup, berair, dan petik pagi. Sesuai untuk salad, jus detox, acar, atau makan macam tu je. Sekali rasa, confirm repeat.</p>
-        <a class="btn" href="#order">Nak Timun Ni 🔥</a>
+        <h1>TIMUN SEGAR <span class="highlight">PETIK PAGI</span></h1>
+        <p class="lead">Untuk salad, jus, acar atau makan terus. Rangup, berair, dan rasa fresh sebenar dari ladang.</p>
+        <a class="btn" href="#order">Saya Nak Promo 🔥</a>
       </div>
       <aside class="panel">
-        <strong>Promo Minggu Ini</strong>
+        <strong>Pakej Promo Minggu Ini</strong>
         <div class="price">RM19 <span class="old">RM29</span></div>
-        <p>1 kotak (±2kg) timun premium</p>
-        <ul class="list">
-          <li>Petik pagi, proses cepat</li>
-          <li>Packaging sejuk + selamat</li>
-          <li>Jaminan fresh atau ganti</li>
+        <p>1 kotak ±2kg timun premium</p>
+        <ul>
+          <li>✅ Petik pagi, packing petang</li>
+          <li>✅ Timun grade A dipilih manual</li>
+          <li>✅ Jaminan fresh 100% atau ganti</li>
         </ul>
       </aside>
     </section>
 
-    <section class="section">
-      <div class="cards">
-        <article class="card">
-          <h3>💧 Sangat Berair</h3>
-          <p>Tekstur crisp dengan rasa clean. Perfect untuk cuaca panas Malaysia.</p>
-        </article>
-        <article class="card">
-          <h3>🌱 Tanpa Wax Tebal</h3>
-          <p>Permukaan natural, senang cuci, terus guna dalam masakan harian.</p>
-        </article>
-        <article class="card">
-          <h3>🚚 Fast Delivery</h3>
-          <p>Order sebelum 12 tengah hari, kami usahakan hantar hari yang sama.</p>
-        </article>
+    <section class="section grid3">
+      <article class="card"><strong>💧 Berair & Crisp</strong><p>Tekstur padu, tak lembik. Sesuai cuaca panas.</p></article>
+      <article class="card"><strong>🌱 Natural Finish</strong><p>Kurang wax, mudah cuci, terus boleh guna.</p></article>
+      <article class="card"><strong>🚚 Fast Delivery</strong><p>Order awal, peluang tinggi sampai hari sama.</p></article>
+    </section>
+
+    <section class="section split">
+      <div class="card">
+        <h2>Kenapa ramai repeat order?</h2>
+        <ul>
+          <li>Saiz konsisten, senang portioning</li>
+          <li>Tahan lebih lama bila simpan betul</li>
+          <li>Sesuai untuk keluarga & peniaga kecil</li>
+          <li>Harga promosi direct-to-consumer</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Siapa sesuai beli?</h2>
+        <ul>
+          <li>Mak-mak yang masak setiap hari</li>
+          <li>Orang diet / detox</li>
+          <li>Peniaga nasi campur / salad booth</li>
+          <li>Sesiapa nak stok sayur fresh mingguan</li>
+        </ul>
       </div>
     </section>
 
-    <section id="order" class="cta">
-      <h2>JANGAN BAGI STOK HABIS</h2>
-      <p>Ambil pakej promo sekarang dan rasa beza timun betul-betul fresh.</p>
-      <a class="btn" href="https://wa.me/60123456789">WhatsApp Order</a>
-      <div class="mini">Bayaran: FPX / Transfer • COD ikut kawasan</div>
+    <section class="section">
+      <h2 style="font-size:48px;margin-bottom:10px">Testimoni Pelanggan</h2>
+      <div class="split">
+        <div class="testimonial">“Mmg fresh. Anak saya yang tak suka sayur pun makan timun ni cicah sambal kicap.” — <strong>Nora, Shah Alam</strong></div>
+        <div class="testimonial">“Sebelum ni cepat lembik. Yang ni tahan lama & texture puas hati.” — <strong>Hafiz, Bangi</strong></div>
+      </div>
     </section>
+
+    <section class="section faq">
+      <h2 style="font-size:48px;margin-bottom:10px">Soalan Lazim</h2>
+      <details><summary>Macam mana penghantaran dibuat?</summary><p>Kami guna rider tempatan / courier bergantung zon. Timun dibungkus dengan ventilasi sesuai.</p></details>
+      <details><summary>Kalau timun tak fresh bila sampai?</summary><p>Ambil gambar dalam 2 jam lepas terima. Kami akan ganti/refund ikut kes.</p></details>
+      <details><summary>Boleh beli borong?</summary><p>Boleh. Untuk 20kg ke atas, WhatsApp untuk harga borong khas.</p></details>
+    </section>
+
+    <section id="order" class="cta">
+      <h2>STOK TERHAD HARI INI</h2>
+      <div class="count">⏳ Promo tamat malam ni, 11:59 PM</div>
+      <p>Isi detail ringkas atau terus WhatsApp untuk lock promo RM19.</p>
+      <form class="form" onsubmit="event.preventDefault();window.location.href='https://wa.me/60123456789?text=Saya%20nak%20order%20timun%20promo%20RM19';">
+        <input type="text" placeholder="Nama" required>
+        <input type="tel" placeholder="No. WhatsApp" required>
+        <button class="btn" type="submit">Lock Promo</button>
+      </form>
+      <p style="margin-top:10px"><a class="btn" href="https://wa.me/60123456789?text=Saya%20nak%20order%20timun%20promo%20RM19">Terus WhatsApp</a></p>
+      <small style="color:#a7c8b3">Bayaran: FPX / Transfer / COD (terpilih)</small>
+    </section>
+
+    <footer>© 2026 Timun Segar Kampung • Fresh or Replace Guarantee</footer>
   </div>
 </body>
 </html>
