@@ -89,6 +89,10 @@
         <h3>Senarai Surat</h3>
         <div style="display:flex;gap:8px"><button class="btn alt" onclick="requestNotify()">Aktifkan Reminder Browser</button><button class="btn alt" onclick="clearAll()">Padam Semua</button></div>
       </div>
+      <div class="row" style="margin:8px 0">
+        <div><input id="searchInput" placeholder="Cari nama / no surat / IC" oninput="render()" /></div>
+        <div style="display:flex;align-items:center;gap:8px"><input id="dueOnly" type="checkbox" onchange="render()" style="width:auto" /><label for="dueOnly">Tunjuk due/hampir due sahaja</label></div>
+      </div>
       <table>
         <thead><tr><th>No Surat</th><th>Nama</th><th>Prinsipal</th><th>Upah/Bulan</th><th>Next Due</th><th>Status</th><th>Tebus Penuh (Hari Ini)</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
@@ -167,7 +171,18 @@
 
     function statusFor(d){const days=Math.ceil((d-new Date())/86400000);if(days<0)return ['Lewat', 'due'];if(days<=5)return ['Hampir Due','soon'];return [`${days} hari lagi`,'ok'];}
     function render(){
-      document.getElementById('rows').innerHTML=records.map(r=>{const due=nextDueDate(r);const [txt,cls]=statusFor(due);return `<tr><td>${r.refNo}</td><td>${r.customer}</td><td>${rm(r.remainingPrincipal||r.principal)}</td><td>${rm(monthlyFee(r))}</td><td>${due.toLocaleDateString('ms-MY')}</td><td><span class='badge ${cls}'>${txt}</span></td><td>${rm(fullRedeemToday(r))}</td><td><button class='btn alt' onclick='del("${r.id}")'>Padam</button></td></tr>`}).join('');
+      const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+      const dueOnly=document.getElementById('dueOnly')?.checked;
+      const view=records
+        .map(r=>({r,d:nextDueDate(r),days:Math.ceil((nextDueDate(r)-new Date())/86400000)}))
+        .filter(x=>{
+          const hay=`${x.r.refNo||''} ${x.r.customer||''} ${x.r.ic||''}`.toLowerCase();
+          const okSearch=!q || hay.includes(q);
+          const okDue=!dueOnly || x.days<=5;
+          return okSearch && okDue;
+        })
+        .sort((a,b)=>a.d-b.d);
+      document.getElementById('rows').innerHTML=view.map(x=>{const r=x.r,d=x.d;const [txt,cls]=statusFor(d);return `<tr><td>${r.refNo}</td><td>${r.customer}</td><td>${rm(r.remainingPrincipal||r.principal)}</td><td>${rm(monthlyFee(r))}</td><td>${d.toLocaleDateString('ms-MY')}</td><td><span class='badge ${cls}'>${txt}</span></td><td>${rm(fullRedeemToday(r))}</td><td><button class='btn alt' onclick='del("${r.id}")'>Padam</button></td></tr>`}).join('');
       document.getElementById('calcRecord').innerHTML=records.map(r=>`<option value='${r.id}'>${r.refNo} - ${r.customer}</option>`).join('');
       const totalPrincipal=records.reduce((a,b)=>a+Number(b.remainingPrincipal||b.principal||0),0);
       const totalMonthly=records.reduce((a,b)=>a+monthlyFee(b),0);
