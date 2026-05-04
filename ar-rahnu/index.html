@@ -20,7 +20,7 @@
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
     .btn{background:var(--acc);border:none;color:#16220a;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}.btn.alt{background:#2b364b;color:#dbe6f5}
     table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid #2c374b;padding:9px;text-align:left;font-size:13px} th{color:#b9cae4}
-    .badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.due{background:#3a2a2a;color:#ffc5c5}.soon{background:#3a3822;color:#ffe9a6}.ok{background:#1f3528;color:#bdf7ce}
+    .badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.critical{background:#4d1717;color:#ffb5b5}.due{background:#3a2a2a;color:#ffc5c5}.soon{background:#3a3822;color:#ffe9a6}.ok{background:#1f3528;color:#bdf7ce}
     .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:#131b28;border:1px solid #2f3a4f;border-radius:12px;padding:12px}
     .kpi b{display:block;font-size:21px}
     @media(max-width:980px){.grid,.row,.row3,.cards{grid-template-columns:1fr}}
@@ -169,7 +169,7 @@
     }
     const v=id=>document.getElementById(id).value.trim();
 
-    function statusFor(d){const days=Math.ceil((d-new Date())/86400000);if(days<0)return ['Lewat', 'due'];if(days<=5)return ['Hampir Due','soon'];return [`${days} hari lagi`,'ok'];}
+    function statusFor(d){const days=Math.ceil((d-new Date())/86400000);if(days<-30)return ['Lewat >30 hari','critical'];if(days<0)return ['Lewat', 'due'];if(days<=5)return ['Hampir Due','soon'];return [`${days} hari lagi`,'ok'];}
     function render(){
       const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
       const dueOnly=document.getElementById('dueOnly')?.checked;
@@ -182,7 +182,7 @@
           return okSearch && okDue;
         })
         .sort((a,b)=>a.d-b.d);
-      document.getElementById('rows').innerHTML=view.map(x=>{const r=x.r,d=x.d;const [txt,cls]=statusFor(d);return `<tr><td>${r.refNo}</td><td>${r.customer}</td><td>${rm(r.remainingPrincipal||r.principal)}</td><td>${rm(monthlyFee(r))}</td><td>${d.toLocaleDateString('ms-MY')}</td><td><span class='badge ${cls}'>${txt}</span></td><td>${rm(fullRedeemToday(r))}</td><td><button class='btn alt' onclick='del("${r.id}")'>Padam</button></td></tr>`}).join('');
+      document.getElementById('rows').innerHTML=view.map(x=>{const r=x.r,d=x.d;const [txt,cls]=statusFor(d);return `<tr><td>${r.refNo}</td><td>${r.customer}</td><td>${rm(r.remainingPrincipal||r.principal)}</td><td>${rm(monthlyFee(r))}</td><td>${d.toLocaleDateString('ms-MY')}</td><td><span class='badge ${cls}'>${txt}</span></td><td>${rm(fullRedeemToday(r))}</td><td><button class='btn alt' onclick='printSlip("${r.id}")'>Slip</button> <button class='btn alt' onclick='del("${r.id}")'>Padam</button></td></tr>`}).join('');
       document.getElementById('calcRecord').innerHTML=records.map(r=>`<option value='${r.id}'>${r.refNo} - ${r.customer}</option>`).join('');
       const totalPrincipal=records.reduce((a,b)=>a+Number(b.remainingPrincipal||b.principal||0),0);
       const totalMonthly=records.reduce((a,b)=>a+monthlyFee(b),0);
@@ -425,6 +425,21 @@
       const lines=[headers.join(',')].concat(records.map(r=>headers.map(h=>`"${String(r[h]??'').replaceAll('"','""')}"`).join(',')));
       const blob=new Blob([lines.join('\n')],{type:'text/csv'});
       const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='arrahnu-records.csv';a.click();
+    }
+
+    function printSlip(id){
+      const r=records.find(x=>x.id===id); if(!r) return;
+      const html=`<html><head><title>Slip ${r.refNo}</title><style>body{font-family:Arial;padding:24px}h2{margin-bottom:6px}table{border-collapse:collapse;width:100%}td{border:1px solid #ddd;padding:8px}</style></head><body>
+      <h2>Slip Ar-Rahnu</h2><p>No Surat: <b>${r.refNo}</b></p>
+      <table>
+      <tr><td>Nama</td><td>${r.customer}</td></tr>
+      <tr><td>No IC</td><td>${r.ic||'-'}</td></tr>
+      <tr><td>Barang</td><td>${r.item||'-'}</td></tr>
+      <tr><td>Prinsipal Aktif</td><td>${rm(r.remainingPrincipal||r.principal)}</td></tr>
+      <tr><td>Upah Bulanan</td><td>${rm(monthlyFee(r))}</td></tr>
+      <tr><td>Tebus Penuh Hari Ini</td><td>${rm(fullRedeemToday(r))}</td></tr>
+      </table><p style='margin-top:20px'>Dijana: ${new Date().toLocaleString('ms-MY')}</p></body></html>`;
+      const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
     }
 
     function buildMonthlyReport(){
