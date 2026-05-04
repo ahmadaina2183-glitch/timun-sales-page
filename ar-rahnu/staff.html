@@ -59,8 +59,11 @@
     </section>
 
     <section id="p-users" class="card hidden">
-      <h3>User Management</h3>
-      <input id="search" placeholder="Cari user.." oninput="renderTable()" />
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h3 style="margin:0">User Management</h3>
+        <button onclick="show('add')">+ Add User</button>
+      </div>
+      <input id="search" placeholder="Cari user.." oninput="renderTable()" style="margin-top:8px" />
       <table><thead><tr><th>Email</th><th>Nama</th><th>Plan</th><th>Start</th><th>Expire</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table>
     </section>
 
