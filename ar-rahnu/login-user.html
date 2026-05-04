@@ -1,1 +1,47 @@
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./login.html?role=user"><title>Redirect</title><script>location.replace('./login.html?role=user')</script>
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>User Access</title>
+<style>body{font-family:Arial;background:#0f1722;color:#eef3fb;display:grid;place-items:center;min-height:100vh;margin:0;padding:14px}.box{width:min(430px,100%);background:#152131;border:1px solid #30405b;border-radius:14px;padding:16px}.tabs{display:flex;gap:8px;margin-bottom:10px}.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid #44597a;background:#1a2739;color:#dce8fa}.tabs button.active{background:#9ce84d;color:#13210b;border:none}input{width:100%;padding:11px;border-radius:10px;border:1px solid #3a4d6c;background:#0f1724;color:#fff;margin:6px 0}button.primary{width:100%;padding:11px;border:none;border-radius:10px;background:#9ce84d;font-weight:700;color:#12210a}a{color:#9ce84d}.hide{display:none}</style></head>
+<body>
+<div class="box">
+  <h2>User Portal</h2>
+  <div class="tabs">
+    <button id="tLogin" class="active" onclick="show('login')">Login</button>
+    <button id="tReg" onclick="show('reg')">Register</button>
+    <button id="tForgot" onclick="show('forgot')">Forgot</button>
+  </div>
+
+  <div id="loginPane">
+    <input id="lEmail" type="email" placeholder="Email">
+    <input id="lPass" type="password" placeholder="Password">
+    <button class="primary" onclick="loginUser()">Login</button>
+  </div>
+
+  <div id="regPane" class="hide">
+    <input id="rName" placeholder="Nama penuh">
+    <input id="rEmail" type="email" placeholder="Email">
+    <input id="rPass" type="password" placeholder="Password min 6">
+    <button class="primary" onclick="registerUser()">Register</button>
+  </div>
+
+  <div id="forgotPane" class="hide">
+    <input id="fEmail" type="email" placeholder="Email">
+    <button class="primary" onclick="requestCode()">Minta Kod Reset</button>
+    <input id="fCode" placeholder="Kod reset 6 digit">
+    <input id="fNew" type="password" placeholder="Password baru">
+    <button class="primary" onclick="confirmReset()">Confirm Reset</button>
+  </div>
+
+  <p id="msg"></p>
+  <p><a href="./login-staff.html">Staff login</a> • <a href="./login-admin.html">Admin login</a></p>
+</div>
+<script>
+const API_KEY='arrahnu_sync_cfg_v1', AUTH_KEY='arrahnu_auth_token_v1', PROFILE_KEY='arrahnu_profile_v1';
+function api(){const c=JSON.parse(localStorage.getItem(API_KEY)||'{}'); return (c.apiBase||'').replace(/\/$/,'');}
+function m(t){document.getElementById('msg').textContent=t}
+function show(x){['login','reg','forgot'].forEach(v=>{document.getElementById(v+'Pane').classList.toggle('hide',v!==x);document.getElementById('t'+(v==='reg'?'Reg':v==='forgot'?'Forgot':'Login')).classList.toggle('active',v===x)})}
+async function loginUser(){if(!api())return m('Set API Base URL dulu dalam app utama.');const email=lEmail.value.trim(),password=lPass.value;const r=await fetch(api()+'/auth/login-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const d=await r.json();if(!r.ok)return m(d.error||'Login gagal');localStorage.setItem(AUTH_KEY,d.token||'');localStorage.setItem(PROFILE_KEY,JSON.stringify({role:'user',email:d.user.email}));location.href='./index.html';}
+async function registerUser(){if(!api())return m('Set API Base URL dulu dalam app utama.');const fullName=rName.value.trim(),email=rEmail.value.trim(),password=rPass.value;const r=await fetch(api()+'/auth/register-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fullName,email,password})});const d=await r.json();if(!r.ok)return m(d.error||'Register gagal');m('Register berjaya. Sila login.');show('login');}
+async function requestCode(){if(!api())return m('Set API Base URL dulu.');const email=fEmail.value.trim();const r=await fetch(api()+'/auth/request-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();if(!r.ok)return m(d.error||'Gagal minta kod');m('Kod reset: '+(d.resetCode||'semak email'))}
+async function confirmReset(){if(!api())return m('Set API Base URL dulu.');const email=fEmail.value.trim(),code=fCode.value.trim(),newPassword=fNew.value;const r=await fetch(api()+'/auth/confirm-password-reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword})});const d=await r.json();if(!r.ok)return m(d.error||'Reset gagal');m('Password berjaya direset. Sila login.');show('login');}
+</script>
+</body></html>

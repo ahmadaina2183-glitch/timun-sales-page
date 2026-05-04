@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS arrahnu_app_users (
   token_version INT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS arrahnu_password_resets (
+  email TEXT PRIMARY KEY,
+  code TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

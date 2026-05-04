@@ -54,6 +54,8 @@ docker compose exec -T db psql -U postgres -d arrahnu < schema.sql
 ## Endpoint
 - `POST /auth/register-user`
 - `POST /auth/login-user`
+- `POST /auth/request-password-reset`
+- `POST /auth/confirm-password-reset`
 - `POST /auth/login`
 - `GET /auth/me`
 - `POST /auth/reset-password` (auth)

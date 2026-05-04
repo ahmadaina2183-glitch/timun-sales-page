@@ -26,6 +26,7 @@ async function initDb() {
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_staff_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'staff', token_version INT NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_audit_logs (id BIGSERIAL PRIMARY KEY, actor_email TEXT, action TEXT NOT NULL, target TEXT, meta JSONB, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
   await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_app_users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, full_name TEXT, token_version INT NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS arrahnu_password_resets (email TEXT PRIMARY KEY, code TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW());`);
 
   // Seed 1 admin from env if missing
   if (process.env.STAFF_EMAIL && process.env.STAFF_PASSWORD) {
@@ -74,6 +75,44 @@ app.post('/auth/register-user', async (req, res) => {
   const hash = await bcrypt.hash(password, 10);
   await pool.query('INSERT INTO arrahnu_app_users (email, password_hash, full_name) VALUES ($1,$2,$3)', [email, hash, fullName || null]);
   await logAudit(email, 'user.register', email);
+  res.json({ ok: true });
+});
+
+app.post('/auth/request-password-reset', async (req, res) => {
+  const { email = '' } = req.body || {};
+  if (!email) return res.status(400).json({ ok: false, error: 'email required' });
+
+  const exists = await pool.query('SELECT email FROM arrahnu_app_users WHERE email=$1', [email]);
+  if (!exists.rows.length) return res.json({ ok: true, message: 'Jika email wujud, kod reset dihantar.' });
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  await pool.query(
+    `INSERT INTO arrahnu_password_resets (email, code, expires_at, updated_at)
+     VALUES ($1,$2,NOW() + INTERVAL '15 minutes', NOW())
+     ON CONFLICT (email) DO UPDATE SET code=EXCLUDED.code, expires_at=EXCLUDED.expires_at, updated_at=NOW()`,
+    [email, code]
+  );
+  await logAudit(email, 'user.request_reset', email);
+
+  // Template mode: return code directly (for production, send by email/SMS)
+  res.json({ ok: true, resetCode: code, message: 'Kod reset dijana (template mode).' });
+});
+
+app.post('/auth/confirm-password-reset', async (req, res) => {
+  const { email = '', code = '', newPassword = '' } = req.body || {};
+  if (!email || !code || !newPassword) return res.status(400).json({ ok: false, error: 'email/code/newPassword required' });
+  if (newPassword.length < 6) return res.status(400).json({ ok: false, error: 'newPassword min 6 chars' });
+
+  const q = await pool.query('SELECT code, expires_at FROM arrahnu_password_resets WHERE email=$1', [email]);
+  if (!q.rows.length) return res.status(400).json({ ok: false, error: 'Kod reset tiada' });
+  const rec = q.rows[0];
+  if (String(rec.code) !== String(code)) return res.status(400).json({ ok: false, error: 'Kod reset salah' });
+  if (new Date(rec.expires_at) < new Date()) return res.status(400).json({ ok: false, error: 'Kod reset expired' });
+
+  const hash = await bcrypt.hash(newPassword, 10);
+  await pool.query('UPDATE arrahnu_app_users SET password_hash=$1, token_version=token_version+1 WHERE email=$2', [hash, email]);
+  await pool.query('DELETE FROM arrahnu_password_resets WHERE email=$1', [email]);
+  await logAudit(email, 'user.confirm_reset', email);
   res.json({ ok: true });
 });
 
