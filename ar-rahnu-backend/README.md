@@ -34,9 +34,21 @@ npm run hash -- "passwordBaru"
 ```
 Lepas tu guna endpoint `/staff/change-password` untuk rotate password.
 
-## 5) Run
+## 5) Run (local)
 ```bash
 npm run dev
+```
+
+## 6) Run (Docker production-style)
+```bash
+cp .env.example .env
+# edit .env (ALLOWED_ORIGIN, JWT_SECRET, VAPID keys, STAFF credentials)
+docker compose up -d --build
+```
+
+Selepas container up, apply schema (sekali je):
+```bash
+docker compose exec -T db psql -U postgres -d arrahnu < schema.sql
 ```
 
 ## Endpoint
