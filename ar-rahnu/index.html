@@ -87,6 +87,11 @@
         <tbody id="rows"></tbody>
       </table>
     </section>
+
+    <section class="panel" style="margin-top:12px">
+      <h3>Reminder Bulanan (30 hari akan datang)</h3>
+      <div id="reminderList" class="muted"></div>
+    </section>
   </div>
 
   <script>
@@ -122,6 +127,14 @@
         <div class='kpi'><small class='muted'>Total Prinsipal Aktif</small><b>${rm(totalPrincipal)}</b></div>
         <div class='kpi'><small class='muted'>Anggaran Upah/Bulan</small><b>${rm(totalMonthly)}</b></div>
         <div class='kpi'><small class='muted'>Due ≤ 5 Hari</small><b>${dueSoon}</b></div>`;
+
+      const soon = records
+        .map(r=>({r,d:nextDueDate(r),days:Math.ceil((nextDueDate(r)-new Date())/86400000)}))
+        .filter(x=>x.days<=30)
+        .sort((a,b)=>a.d-b.d);
+      document.getElementById('reminderList').innerHTML = soon.length
+        ? soon.map(x=>`• ${x.r.refNo} (${x.r.customer}) - ${x.d.toLocaleDateString('ms-MY')} (${x.days<0?'Lewat':x.days+' hari lagi'})`).join('<br>')
+        : 'Tiada reminder dalam 30 hari.';
     }
     function del(id){records=records.filter(r=>r.id!==id);save();}
     function clearAll(){if(confirm('Padam semua data?')){records=[];save();}}
@@ -164,7 +177,17 @@
 
     function notifyCheck(){
       if(!('Notification' in window) || Notification.permission!=='granted') return;
-      records.forEach(r=>{const d=nextDueDate(r);const today=new Date();if(d.toDateString()===today.toDateString()) new Notification('Reminder Ar-Rahnu',{body:`Surat ${r.refNo} (${r.customer}) due hari ini.`});});
+      const sent = JSON.parse(localStorage.getItem('arrahnu_notified')||'[]');
+      const today = new Date();
+      records.forEach(r=>{
+        const d=nextDueDate(r);
+        const key=`${r.id}-${d.getFullYear()}-${d.getMonth()+1}`;
+        if(d.toDateString()===today.toDateString() && !sent.includes(key)){
+          new Notification('Reminder Ar-Rahnu',{body:`Surat ${r.refNo} (${r.customer}) due hari ini.`});
+          sent.push(key);
+        }
+      });
+      localStorage.setItem('arrahnu_notified', JSON.stringify(sent));
     }
 
     function downloadData(){
