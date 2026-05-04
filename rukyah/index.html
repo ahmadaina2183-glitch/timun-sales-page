@@ -3,85 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rukyah Ar-Rahmah | Versi Premium</title>
-  <meta name="description" content="Perkhidmatan rukyah syar'iyyah premium dengan pendekatan tenang, tersusun, dan berlandaskan Al-Quran & Sunnah." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>Rukyah Ar-Rahmah | Ultra Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#071018;--card:#0f2130;--gold:#e8cc8a;--line:rgba(232,204,138,.25);--text:#edf3f8;--muted:#aebdcb}
-    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% 10%,#163249,#071018 52%),linear-gradient(180deg,#071018,#050b11);color:var(--text);font-family:"Manrope",sans-serif}
-    .wrap{max-width:1160px;margin:auto;padding:24px}
-    .nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .brand{font-family:"Cinzel",serif;font-size:22px;letter-spacing:.8px;color:var(--gold)}
-    .btn{display:inline-block;background:var(--gold);color:#19242f;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:700}
-    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:38px 0}
-    h1,h2,h3{font-family:"Cinzel",serif;margin:0}
-    h1{font-size:clamp(38px,6vw,70px);line-height:1.02}
-    h2{font-size:clamp(30px,4vw,50px)}
-    .lead{font-size:19px;color:var(--muted);max-width:620px}
-    .panel,.card,.faq details{background:linear-gradient(160deg,#143247,#0f2130);border:1px solid var(--line);border-radius:18px;padding:18px}
-    .hero-img{width:100%;height:420px;object-fit:cover;border-radius:18px;border:1px solid var(--line)}
-    .pill{display:inline-block;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:#d9e8f2;font-size:13px}
-    .section{margin-top:52px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .card p,.muted{color:var(--muted)}
-    ul{padding-left:18px}
-    .faq details{margin-bottom:8px}
-    .cta{text-align:center;padding:34px;background:linear-gradient(150deg,#193850,#0f2130);border:1px solid var(--line);border-radius:20px}
-    footer{text-align:center;margin:34px 0 8px;color:#90a6b7;font-size:13px}
-    @media(max-width:930px){.hero,.grid3,.split{grid-template-columns:1fr}.hero-img{height:300px}}
+    :root{--bg:#060d15;--card:#0f2130;--gold:#e8cc8a;--line:rgba(232,204,138,.25);--text:#eef5fb;--muted:#aec0cf}
+    *{box-sizing:border-box} body{margin:0;font-family:"Manrope",sans-serif;color:var(--text);background:radial-gradient(circle at 20% 8%,#17344b,#060d15 56%),linear-gradient(180deg,#060d15,#04090e)}
+    .wrap{max-width:1180px;margin:auto;padding:24px}.nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .brand{font-family:"Cinzel",serif;color:var(--gold);font-size:22px;letter-spacing:1px}.btn{display:inline-block;background:var(--gold);color:#1a2530;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:800}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:center;padding:42px 0} h1,h2,h3{font-family:"Cinzel",serif;margin:0}
+    h1{font-size:clamp(40px,6vw,74px);line-height:1.01} h2{font-size:clamp(32px,4vw,54px)} .lead{font-size:19px;color:var(--muted)}
+    .panel,.card,.faq details,.testi{background:linear-gradient(160deg,#16344a,#0f2130);border:1px solid var(--line);border-radius:18px;padding:18px}
+    .hero-img{width:100%;height:430px;object-fit:cover;border-radius:16px;border:1px solid var(--line)} .pill{display:inline-block;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:#d8e7f1}
+    .section{margin-top:54px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.testi img{width:100%;height:220px;object-fit:cover;border-radius:12px;border:1px solid rgba(232,204,138,.2);margin-bottom:10px}
+    .muted{color:var(--muted)} .faq details{margin-bottom:8px} .cta{text-align:center;padding:36px;background:linear-gradient(150deg,#1a3a52,#0f2130);border:1px solid var(--line);border-radius:20px}
+    footer{text-align:center;margin:35px 0 8px;color:#93a9b9;font-size:13px}
+    @media(max-width:960px){.hero,.grid3,.split,.testi-grid{grid-template-columns:1fr}.hero-img{height:300px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header class="nav">
-      <div class="brand">RUKYAH AR-RAHMAH</div>
-      <a class="btn" href="#hubungi">Tempah Konsultasi</a>
-    </header>
+    <header class="nav"><div class="brand">RUKYAH AR-RAHMAH</div><a class="btn" href="#hubungi">Tempah Konsultasi</a></header>
 
     <section class="hero">
       <div>
-        <span class="pill">Berlandaskan Al-Quran & Sunnah</span>
-        <h1>Pendekatan Rukyah Yang Tenang, Beradab & Profesional</h1>
-        <p class="lead">Kami bantu anda dan keluarga melalui sesi rukyah syar'iyyah yang tersusun — bermula dengan konsultasi, rawatan, dan pelan amalan susulan yang jelas.</p>
-        <p><a class="btn" href="#servis">Lihat Servis Premium</a></p>
+        <span class="pill">Rukyah Syar'iyyah • Premium Care</span>
+        <h1>Pusat Rukyah Eksklusif Dengan Pendekatan Tenang & Tersusun</h1>
+        <p class="lead">Rawatan berlandaskan Al-Quran & Sunnah, menjaga adab, privasi, dan ketenangan pelanggan dari konsultasi awal hingga pelan susulan.</p>
+        <p><a class="btn" href="#servis">Lihat Servis</a></p>
       </div>
-      <div class="panel">
-        <img class="hero-img" src="assets/hero.png" alt="Suasana pusat rukyah premium" />
-      </div>
+      <div class="panel"><img class="hero-img" src="assets/hero.png" alt="Suasana pusat rukyah premium" /></div>
     </section>
 
     <section id="servis" class="section grid3">
-      <article class="card"><h3>Konsultasi Privasi</h3><p>Penilaian awal yang sensitif dan tersusun, sesuai individu atau keluarga.</p></article>
-      <article class="card"><h3>Sesi Rukyah</h3><p>Bacaan ayat rukyah, doa ma'thur, dan bimbingan rohani secara tertib.</p></article>
-      <article class="card"><h3>Pelan Susulan</h3><p>Panduan amalan harian supaya pemulihan lebih stabil dan berpanjangan.</p></article>
+      <article class="card"><h3>Konsultasi Premium</h3><p class="muted">Saringan awal mendalam untuk faham keadaan individu/keluarga.</p></article>
+      <article class="card"><h3>Sesi Rukyah Syar'iyyah</h3><p class="muted">Bacaan ayat rukyah, doa ma’thur, serta panduan ibadah yang jelas.</p></article>
+      <article class="card"><h3>Aftercare Berstruktur</h3><p class="muted">Checklist amalan & pemantauan susulan untuk kestabilan rohani.</p></article>
     </section>
 
     <section class="section split">
       <div class="card">
-        <h2>Nilai Yang Kami Jaga</h2>
+        <h2>Kenapa Klien Pilih Kami</h2>
         <ul>
-          <li>Tiada unsur khurafat / syirik</li>
-          <li>Penjelasan jelas, tidak menakutkan</li>
-          <li>Adab, privasi & maruah pelanggan diutamakan</li>
-          <li>Sesuai wanita, lelaki, dan keluarga</li>
+          <li>Tiada unsur khurafat atau syirik</li>
+          <li>Penerangan lembut, tidak menakutkan</li>
+          <li>Privasi dan maruah pelanggan dijaga</li>
+          <li>Sesuai lelaki, wanita & keluarga</li>
         </ul>
       </div>
       <div class="card faq">
-        <h2>Soalan Lazim</h2>
-        <details><summary>Berapa lama satu sesi?</summary><p>Kebiasaannya 45-90 minit, bergantung kes.</p></details>
-        <details><summary>Boleh konsultasi online?</summary><p>Boleh untuk saringan awal dan bimbingan asas.</p></details>
-        <details><summary>Ada jaminan?</summary><p>Kami fokus ikhtiar syar'ie dan susulan disiplin amalan; hasil berbeza ikut individu.</p></details>
+        <h2>FAQ</h2>
+        <details><summary>Tempoh satu sesi?</summary><p>45-90 minit, bergantung keperluan kes.</p></details>
+        <details><summary>Ada sesi online?</summary><p>Ada untuk konsultasi awal dan panduan asas.</p></details>
+        <details><summary>Bagaimana follow-up?</summary><p>Kami beri pelan amalan yang praktikal dan mudah ikut.</p></details>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Testimoni Klien</h2>
+      <div class="testi-grid">
+        <article class="testi"><img src="assets/testi-1.png" alt="Testimoni pelanggan 1" /><p>“Layanan sangat beradab. Saya rasa jauh lebih tenang lepas sesi.”</p><strong>— Puan N</strong></article>
+        <article class="testi"><img src="assets/testi-2.png" alt="Testimoni pelanggan 2" /><p>“Penjelasan jelas, tak seram-seram. Saya faham apa amalan susulan kena buat.”</p><strong>— Encik H</strong></article>
+        <article class="testi"><img src="assets/testi-3.png" alt="Testimoni pelanggan 3" /><p>“Sesi tersusun, privasi dijaga. Sangat profesional dari awal sampai akhir.”</p><strong>— Pasangan M&A</strong></article>
       </div>
     </section>
 
     <section id="hubungi" class="section cta">
-      <h2>Mulakan Konsultasi Sekarang</h2>
-      <p class="muted">Hubungi kami untuk slot terdekat dan penerangan lanjut.</p>
-      <a class="btn" href="https://wa.me/60123456789?text=Assalamualaikum,%20saya%20nak%20konsultasi%20rukyah%20premium">WhatsApp Admin</a>
-      <p class="muted" style="margin-top:10px">Waktu operasi: 10:00 pagi – 10:00 malam</p>
+      <h2>Tempah Slot Konsultasi</h2>
+      <p class="muted">Klik WhatsApp untuk semakan slot terdekat.</p>
+      <a class="btn" href="https://wa.me/60123456789?text=Assalamualaikum,%20saya%20nak%20konsultasi%20rukyah%20ultra%20premium">WhatsApp Admin</a>
     </section>
 
     <footer>© 2026 Rukyah Ar-Rahmah • Semoga Allah mempermudah urusan.</footer>
