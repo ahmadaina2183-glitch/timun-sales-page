@@ -46,6 +46,7 @@ const msg=t=>document.getElementById('msg').textContent=t;
 async function api(path,opt={}){return fetch(base+path,{...opt,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(opt.headers||{})}})}
 
 function daysLeft(dt){if(!dt)return null;return Math.ceil((new Date(dt)-new Date())/86400000)}
+function followBtn(u){const d=daysLeft(u.sub_expire); if(d===null || d>=0) return ''; const txt=encodeURIComponent(`Hi ${u.full_name||'tuan/puan'}, subscription anda telah expired pada ${u.sub_expire}. Boleh renew semula hari ini ya.`); return `<a href="https://wa.me/?text=${txt}" target="_blank"><button>Wasap</button></a>`;}
 function renderKpi(list){
   const total=list.length, active=list.filter(x=>x.is_active).length;
   const expSoon=list.filter(x=>{const d=daysLeft(x.sub_expire); return d!==null && d<=7 && d>=0}).length;
@@ -57,12 +58,13 @@ async function load(){
   if(demoMode){
     msg('Demo mode: tanpa login/backend.');
     renderKpi(demoUsers);
-    document.getElementById('rows').innerHTML=demoUsers.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${u.sub_start||'-'}</td><td>${u.sub_expire||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button></td></tr>`).join('');
+    document.getElementById('rows').innerHTML=demoUsers.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${u.sub_start||'-'}</td><td>${u.sub_expire||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button> ${followBtn(u)}</td></tr>`).join('');
     return;
   }
   const r=await api('/users/list'); const d=await r.json(); if(!r.ok) return msg(d.error||'No access');
   const list=d.users||[]; renderKpi(list);
-  document.getElementById('rows').innerHTML=list.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${(u.sub_start||'').slice(0,10)||'-'}</td><td>${(u.sub_expire||'').slice(0,10)||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button></td></tr>`).join('');
+  document.getElementById('rows').innerHTML=list.map(u=>`<tr><td>${u.email}</td><td>${u.full_name||'-'}</td><td>${u.sub_plan||'-'}</td><td>${(u.sub_start||'').slice(0,10)||'-'}</td><td>${(u.sub_expire||'').slice(0,10)||'-'}</td><td>${u.is_active?'active':'inactive'}</td><td><button onclick="fillUser('${u.email}')">Edit</button> <button onclick="delUser('${u.email}')">Padam</button> ${followBtn(u)}</td></tr>`).join('');
+
   window._users=list;
 }
 
