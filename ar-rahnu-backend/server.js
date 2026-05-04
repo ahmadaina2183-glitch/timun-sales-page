@@ -83,6 +83,26 @@ app.get('/staff/list', auth, adminOnly, async (req, res) => {
   res.json({ ok: true, staff: q.rows });
 });
 
+app.post('/staff/change-password', auth, async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body || {};
+  const targetEmail = email || req.user.email;
+  if (!newPassword || newPassword.length < 6) return res.status(400).json({ ok: false, error: 'newPassword min 6 chars' });
+  if (req.user.role !== 'admin' && targetEmail !== req.user.email) return res.status(403).json({ ok: false, error: 'Forbidden' });
+
+  const q = await pool.query('SELECT email, password_hash FROM arrahnu_staff_users WHERE email=$1', [targetEmail]);
+  if (!q.rows.length) return res.status(404).json({ ok: false, error: 'Staff not found' });
+
+  if (req.user.role !== 'admin') {
+    const ok = await bcrypt.compare(oldPassword || '', q.rows[0].password_hash);
+    if (!ok) return res.status(401).json({ ok: false, error: 'oldPassword salah' });
+  }
+
+  const hash = await bcrypt.hash(newPassword, 10);
+  await pool.query('UPDATE arrahnu_staff_users SET password_hash=$1 WHERE email=$2', [hash, targetEmail]);
+  await logAudit(req.user.email, 'staff.change_password', targetEmail);
+  res.json({ ok: true });
+});
+
 app.get('/audit/recent', auth, adminOnly, async (req, res) => {
   const q = await pool.query('SELECT id, actor_email, action, target, meta, created_at FROM arrahnu_audit_logs ORDER BY id DESC LIMIT 200');
   res.json({ ok: true, logs: q.rows });

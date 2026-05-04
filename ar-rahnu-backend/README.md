@@ -25,8 +25,14 @@ Masukkan ke `.env`.
 ## 4) Staff Login config
 Set dalam `.env`:
 - `STAFF_EMAIL`
-- `STAFF_PASSWORD` (atau `STAFF_PASSWORD_HASH`)
+- `STAFF_PASSWORD`
 - `JWT_SECRET`
+
+Opsyen hash password:
+```bash
+npm run hash -- "passwordBaru"
+```
+Lepas tu guna endpoint `/staff/change-password` untuk rotate password.
 
 ## 5) Run
 ```bash
@@ -38,6 +44,7 @@ npm run dev
 - `GET /auth/me`
 - `POST /staff/create` (admin)
 - `GET /staff/list` (admin)
+- `POST /staff/change-password` (auth)
 - `GET /audit/recent` (admin)
 - `GET /health`
 - `POST /arrahnu/sync` (auth)
