@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ar-Rahnu Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root{--bg:#0e1520;--panel:#161f2c;--line:#2f3a4f;--text:#eaf0f8;--muted:#9fb0c8;--acc:#9ce84d;--danger:#ff7b7b}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0e1520,#090f16);color:var(--text);font-family:"IBM Plex Sans",sans-serif}
+    .wrap{max-width:1200px;margin:auto;padding:18px}.title{font-family:"Oswald",sans-serif;font-size:42px;letter-spacing:.5px;margin:0}
+    .muted{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+    label{font-size:13px;color:#c4d0e2} input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #36425a;background:#111927;color:#eef4ff}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .btn{background:var(--acc);border:none;color:#16220a;font-weight:700;padding:10px 14px;border-radius:10px;cursor:pointer}.btn.alt{background:#2b364b;color:#dbe6f5}
+    table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid #2c374b;padding:9px;text-align:left;font-size:13px} th{color:#b9cae4}
+    .badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}.due{background:#3a2a2a;color:#ffc5c5}.soon{background:#3a3822;color:#ffe9a6}.ok{background:#1f3528;color:#bdf7ce}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:#131b28;border:1px solid #2f3a4f;border-radius:12px;padding:12px}
+    .kpi b{display:block;font-size:21px}
+    @media(max-width:980px){.grid,.row,.row3,.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="title">AR-RAHNU MANAGER</h1>
+    <p class="muted">Upload surat (OCR) atau isi manual. Simpan banyak surat, kira tebusan, overlap, dan reminder bulanan.</p>
+
+    <div class="cards" id="kpi"></div>
+
+    <div class="grid" style="margin-top:12px">
+      <section class="panel">
+        <h3>Tambah Surat / Akaun</h3>
+        <div class="row3">
+          <div><label>Nama Penggadai</label><input id="customer" /></div>
+          <div><label>No IC</label><input id="ic" /></div>
+          <div><label>No Surat/Akaun</label><input id="refNo" /></div>
+        </div>
+        <div class="row3">
+          <div><label>Nilai Pinjaman (RM)</label><input id="principal" type="number" step="0.01" /></div>
+          <div><label>Kadar Upah Simpan (% setahun)</label><input id="rate" type="number" step="0.01" value="12" /></div>
+          <div><label>Tarikh Mula</label><input id="startDate" type="date" /></div>
+        </div>
+        <div class="row3">
+          <div><label>Tempoh (bulan)</label><input id="tenure" type="number" value="6" /></div>
+          <div><label>Catatan Barang</label><input id="item" placeholder="Contoh: Rantai emas 916" /></div>
+          <div><label>Baki Prinsipal (jika ada tebus sebahagian)</label><input id="remainingPrincipal" type="number" step="0.01" /></div>
+        </div>
+        <div style="margin-top:8px"><label>Nota</label><textarea id="notes" rows="2"></textarea></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="saveRecord()">Simpan Surat</button>
+          <button class="btn alt" onclick="clearForm()">Reset</button>
+          <button class="btn alt" onclick="downloadData()">Export JSON</button>
+          <label class="btn alt" style="cursor:pointer">Import JSON<input type="file" accept="application/json" style="display:none" onchange="importData(event)" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>OCR Surat (Auto Baca)</h3>
+        <p class="muted">Upload gambar surat. Sistem cuba extract nilai, tarikh, nombor surat, nama.</p>
+        <input type="file" accept="image/*" onchange="runOCR(event)" />
+        <pre id="ocrText" style="white-space:pre-wrap;background:#101826;padding:10px;border-radius:10px;max-height:220px;overflow:auto;margin-top:8px"></pre>
+      </section>
+    </div>
+
+    <section class="panel" style="margin-top:12px">
+      <h3>Kiraan Tebus Sebahagian / Overlap</h3>
+      <div class="row3">
+        <div><label>Pilih Surat</label><select id="calcRecord"></select></div>
+        <div><label>Amaun Tebus Sebahagian (RM)</label><input id="partialRedeem" type="number" step="0.01" /></div>
+        <div><label>Pinjaman Baru Overlap (RM)</label><input id="newLoan" type="number" step="0.01" /></div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="calculateAdvanced()">Kira</button>
+      </div>
+      <div id="calcOut" class="muted" style="margin-top:8px"></div>
+    </section>
+
+    <section class="panel" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3>Senarai Surat</h3>
+        <div style="display:flex;gap:8px"><button class="btn alt" onclick="requestNotify()">Aktifkan Reminder Browser</button><button class="btn alt" onclick="clearAll()">Padam Semua</button></div>
+      </div>
+      <table>
+        <thead><tr><th>No Surat</th><th>Nama</th><th>Prinsipal</th><th>Upah/Bulan</th><th>Next Due</th><th>Status</th><th>Tebus Penuh (Hari Ini)</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    const KEY='arrahnu_records_v1';
+    let records = JSON.parse(localStorage.getItem(KEY)||'[]');
+
+    const rm=v=>`RM ${Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+    const monthlyFee=r=>((Number(r.remainingPrincipal||r.principal)||0)*(Number(r.rate)||0)/100/12);
+    const monthsElapsed=d=>{const s=new Date(d);const n=new Date();return Math.max(0,(n.getFullYear()-s.getFullYear())*12+(n.getMonth()-s.getMonth())+(n.getDate()>=s.getDate()?0:-1));}
+    const addMonths=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x;}
+    function nextDueDate(r){const s=new Date(r.startDate);const m=monthsElapsed(r.startDate)+1;return addMonths(s,m);}
+    function fullRedeemToday(r){return (Number(r.remainingPrincipal||r.principal)||0)+monthlyFee(r)*monthsElapsed(r.startDate)}
+
+    function save(){localStorage.setItem(KEY,JSON.stringify(records));render();}
+    function clearForm(){['customer','ic','refNo','principal','rate','startDate','tenure','item','remainingPrincipal','notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('rate').value=12;document.getElementById('tenure').value=6;}
+    function saveRecord(){
+      const r={id:crypto.randomUUID(),customer:v('customer'),ic:v('ic'),refNo:v('refNo')||`SRT-${Date.now()}`,principal:+v('principal')||0,rate:+v('rate')||0,startDate:v('startDate'),tenure:+v('tenure')||6,item:v('item'),remainingPrincipal:+v('remainingPrincipal')||0,notes:v('notes')};
+      if(!r.customer||!r.startDate||!r.principal)return alert('Isi nama, prinsipal, tarikh mula');
+      if(!r.remainingPrincipal)r.remainingPrincipal=r.principal;
+      records.unshift(r);save();clearForm();
+    }
+    const v=id=>document.getElementById(id).value.trim();
+
+    function statusFor(d){const days=Math.ceil((d-new Date())/86400000);if(days<0)return ['Lewat', 'due'];if(days<=5)return ['Hampir Due','soon'];return [`${days} hari lagi`,'ok'];}
+    function render(){
+      document.getElementById('rows').innerHTML=records.map(r=>{const due=nextDueDate(r);const [txt,cls]=statusFor(due);return `<tr><td>${r.refNo}</td><td>${r.customer}</td><td>${rm(r.remainingPrincipal||r.principal)}</td><td>${rm(monthlyFee(r))}</td><td>${due.toLocaleDateString('ms-MY')}</td><td><span class='badge ${cls}'>${txt}</span></td><td>${rm(fullRedeemToday(r))}</td><td><button class='btn alt' onclick='del("${r.id}")'>Padam</button></td></tr>`}).join('');
+      document.getElementById('calcRecord').innerHTML=records.map(r=>`<option value='${r.id}'>${r.refNo} - ${r.customer}</option>`).join('');
+      const totalPrincipal=records.reduce((a,b)=>a+Number(b.remainingPrincipal||b.principal||0),0);
+      const totalMonthly=records.reduce((a,b)=>a+monthlyFee(b),0);
+      const dueSoon=records.filter(r=>Math.ceil((nextDueDate(r)-new Date())/86400000)<=5).length;
+      document.getElementById('kpi').innerHTML=`
+        <div class='kpi'><small class='muted'>Jumlah Surat</small><b>${records.length}</b></div>
+        <div class='kpi'><small class='muted'>Total Prinsipal Aktif</small><b>${rm(totalPrincipal)}</b></div>
+        <div class='kpi'><small class='muted'>Anggaran Upah/Bulan</small><b>${rm(totalMonthly)}</b></div>
+        <div class='kpi'><small class='muted'>Due ≤ 5 Hari</small><b>${dueSoon}</b></div>`;
+    }
+    function del(id){records=records.filter(r=>r.id!==id);save();}
+    function clearAll(){if(confirm('Padam semua data?')){records=[];save();}}
+
+    async function runOCR(e){
+      const f=e.target.files?.[0]; if(!f) return;
+      document.getElementById('ocrText').textContent='Sedang baca OCR...';
+      const { data:{ text } } = await Tesseract.recognize(f,'eng+msa');
+      document.getElementById('ocrText').textContent=text;
+      autoFill(text);
+    }
+
+    function autoFill(t){
+      const num=(t.match(/(RM\s*)?([0-9]{2,6}(?:[\.,][0-9]{1,2})?)/i)||[])[2];
+      const ref=(t.match(/(No\.?\s*(Surat|Akaun)?\s*[:\-]?\s*([A-Z0-9\-\/]{4,}))/i)||[])[3];
+      const date=(t.match(/(\d{2}[\/\-]\d{2}[\/\-]\d{4})/)||[])[1];
+      if(num) document.getElementById('principal').value=Number(num.replace(',','.'));
+      if(ref) document.getElementById('refNo').value=ref;
+      if(date){const p=date.split(/[\/-]/);document.getElementById('startDate').value=`${p[2]}-${p[1]}-${p[0]}`}
+    }
+
+    function calculateAdvanced(){
+      const id=document.getElementById('calcRecord').value; const r=records.find(x=>x.id===id); if(!r) return;
+      const partial=+v('partialRedeem')||0; const newLoan=+v('newLoan')||0;
+      const redeemNow=fullRedeemToday(r);
+      const newRemaining=Math.max(0,(r.remainingPrincipal||r.principal)-partial);
+      const newMonthly=(newRemaining*(r.rate/100)/12);
+      const overlapProfit=newLoan-redeemNow;
+      document.getElementById('calcOut').innerHTML=`
+        Tebus penuh hari ini: <b>${rm(redeemNow)}</b><br>
+        Baki prinsipal selepas tebus sebahagian: <b>${rm(newRemaining)}</b><br>
+        Upah bulanan baru: <b>${rm(newMonthly)}</b><br>
+        Untung/defisit overlap (Pinjaman baru - Tebus penuh): <b style='color:${overlapProfit>=0?'#9ce84d':'#ff7b7b'}'>${rm(overlapProfit)}</b>`;
+    }
+
+    function requestNotify(){
+      if(!('Notification' in window)) return alert('Browser tak support notification');
+      Notification.requestPermission().then(p=>alert(p==='granted'?'Reminder diaktifkan':'Reminder tak dibenarkan'));
+    }
+
+    function notifyCheck(){
+      if(!('Notification' in window) || Notification.permission!=='granted') return;
+      records.forEach(r=>{const d=nextDueDate(r);const today=new Date();if(d.toDateString()===today.toDateString()) new Notification('Reminder Ar-Rahnu',{body:`Surat ${r.refNo} (${r.customer}) due hari ini.`});});
+    }
+
+    function downloadData(){
+      const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='arrahnu-data.json';a.click();
+    }
+    function importData(e){
+      const f=e.target.files?.[0]; if(!f)return; const r=new FileReader();
+      r.onload=()=>{try{records=JSON.parse(r.result);save();}catch{alert('Format JSON tak sah')}}; r.readAsText(f);
+    }
+
+    render();
+    setInterval(notifyCheck,60000);
+  </script>
+</body>
+</html>
