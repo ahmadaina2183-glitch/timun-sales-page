@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Ar-Rahnu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0e1520;--panel:#151f2d;--line:#2e3950;--text:#ebf2fb;--muted:#a4b7cf;--acc:#9ce84d}
+    *{box-sizing:border-box} body{margin:0;font-family:"IBM Plex Sans",sans-serif;background:linear-gradient(180deg,#0e1520,#0a0f16);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:16px}
+    .box{width:min(430px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+    h1{margin:0 0 10px;font-family:"Oswald",sans-serif;letter-spacing:.6px}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+    .tab{padding:10px;border-radius:10px;border:1px solid #3a4863;background:#1a2536;color:#d7e3f5;cursor:pointer;font-weight:700}
+    .tab.active{background:var(--acc);color:#1a270f;border-color:transparent}
+    label{font-size:13px;color:#c8d6e8}input{width:100%;padding:11px;border-radius:10px;border:1px solid #394764;background:#111a28;color:#f0f6ff}
+    .btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:10px;background:var(--acc);font-weight:800;color:#18240e;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>LOGIN AR-RAHNU</h1>
+    <div class="tabs">
+      <button class="tab active" data-role="user" onclick="setRole('user')">User</button>
+      <button class="tab" data-role="staff" onclick="setRole('staff')">Staff</button>
+      <button class="tab" data-role="admin" onclick="setRole('admin')">Admin</button>
+    </div>
+
+    <label>Email / ID</label>
+    <input id="email" placeholder="contoh: staff@arrahnu.com" />
+
+    <label style="margin-top:8px;display:block">Password</label>
+    <input id="password" type="password" placeholder="••••••" />
+
+    <button class="btn" onclick="loginNow()">Login</button>
+    <div class="muted" id="msg">Role semasa: user</div>
+  </div>
+
+  <script>
+    let role='user';
+    const API_KEY='arrahnu_sync_cfg_v1';
+    const AUTH_KEY='arrahnu_auth_token_v1';
+    const PROFILE_KEY='arrahnu_profile_v1';
+
+    function setRole(r){
+      role=r;
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.role===r));
+      document.getElementById('msg').textContent='Role semasa: '+r;
+    }
+
+    async function loginNow(){
+      const email=document.getElementById('email').value.trim();
+      const password=document.getElementById('password').value;
+      if(!email || !password) return setMsg('Isi email dan password');
+
+      // User role: local-only login
+      if(role==='user'){
+        localStorage.setItem(PROFILE_KEY, JSON.stringify({role,email}));
+        window.location.href='./index.html';
+        return;
+      }
+
+      const cfg=JSON.parse(localStorage.getItem(API_KEY)||'{}');
+      if(!cfg.apiBase) return setMsg('API Base URL belum diset dalam app utama.');
+
+      try{
+        const res = await fetch(cfg.apiBase.replace(/\/$/,'')+'/auth/login',{
+          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})
+        });
+        const data = await res.json();
+        if(!res.ok) return setMsg(data.error||'Login gagal');
+        if(role==='admin' && data.user?.role!=='admin') return setMsg('Akaun ni bukan admin');
+        localStorage.setItem(AUTH_KEY,data.token||'');
+        localStorage.setItem(PROFILE_KEY, JSON.stringify({role:data.user?.role||role,email:data.user?.email||email}));
+        window.location.href='./index.html';
+      }catch(e){ setMsg('Login error: '+e.message); }
+    }
+
+    function setMsg(t){ document.getElementById('msg').textContent=t; }
+  </script>
+</body>
+</html>

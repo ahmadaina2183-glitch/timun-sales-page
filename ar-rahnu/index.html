@@ -140,7 +140,11 @@
     const OPS_KEY='arrahnu_pending_ops_v1';
     const CFG_KEY='arrahnu_sync_cfg_v1';
     const AUTH_KEY='arrahnu_auth_token_v1';
+    const PROFILE_KEY='arrahnu_profile_v1';
     const CLIENT_KEY='arrahnu_client_id_v1';
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY)||'null');
+    if(!profile) window.location.href='./login.html';
+
     let records = JSON.parse(localStorage.getItem(KEY)||'[]');
     let pendingOps = JSON.parse(localStorage.getItem(OPS_KEY)||'[]');
     let syncCfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{"apiBase":"","vapidKey":""}');
@@ -464,7 +468,7 @@
     document.getElementById('vapidKey').value = syncCfg.vapidKey||'';
     const now = new Date();
     document.getElementById('reportMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    setSyncStatus(authToken ? 'Auto-login staff aktif.' : 'Belum login staff.');
+    setSyncStatus(profile ? `Login: ${profile.email} (${profile.role})` : (authToken ? 'Auto-login staff aktif.' : 'Belum login staff.'));
     setInterval(notifyCheck,60000);
     setInterval(()=>{ if(navigator.onLine && pendingOps.length) syncNow(); },120000);
     window.addEventListener('online', ()=>syncNow());
