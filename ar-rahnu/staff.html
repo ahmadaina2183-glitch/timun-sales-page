@@ -118,8 +118,8 @@ function fillUser(email){const u=users.find(x=>x.email===email); if(!u) return; 
 async function saveUser(){
   const payload={email:uEmail.value.trim(),fullName:uName.value.trim(),password:uPass.value||'User@1234',subPlan:uPlan.value,subStart:uStart.value||null,subExpire:uExpire.value||null,isActive:uActive.value==='true'};
   if(!payload.email) return msg('Email required');
-  if(demoMode){users=users.filter(x=>x.email!==payload.email).concat([{email:payload.email,full_name:payload.fullName,sub_plan:payload.subPlan,sub_start:payload.subStart,sub_expire:payload.subExpire,is_active:payload.isActive}]);localStorage.setItem('demo_users_staff',JSON.stringify(users));msg('User disimpan (demo)');renderKpi();renderTable();renderSubs();return;}
-  const r=await api('/users/create',{method:'POST',body:JSON.stringify(payload)}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('User disimpan'); load();
+  if(demoMode){users=users.filter(x=>x.email!==payload.email).concat([{email:payload.email,full_name:payload.fullName,sub_plan:payload.subPlan,sub_start:payload.subStart,sub_expire:payload.subExpire,is_active:payload.isActive}]);localStorage.setItem('demo_users_staff',JSON.stringify(users));msg('User disimpan (demo)');renderKpi();renderTable();renderSubs();show('users');uName.value=uEmail.value=uPass.value='';return;}
+  const r=await api('/users/create',{method:'POST',body:JSON.stringify(payload)}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); msg('User disimpan'); await load(); show('users'); uName.value=uEmail.value=uPass.value='';
 }
 
 async function delUser(email){if(!confirm('Padam '+email+'?')) return; if(demoMode){users=users.filter(x=>x.email!==email);localStorage.setItem('demo_users_staff',JSON.stringify(users));renderKpi();renderTable();renderSubs();return;} const r=await api('/users/'+encodeURIComponent(email),{method:'DELETE'}); const d=await r.json(); if(!r.ok) return msg(d.error||'Gagal'); load();}
